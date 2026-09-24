@@ -21,7 +21,11 @@ fi
 source "$VENV_PATH/bin/activate"
 python -m pip install --upgrade pip
 python -m pip install -e .
-python -m pip install vllm transformers huggingface_hub
+# The cluster NVIDIA driver supports CUDA 12.8.  Newer vLLM releases from
+# PyPI pull CUDA 13 PyTorch wheels, which cannot initialize on these nodes.
+python -m pip install --force-reinstall "vllm==0.11.2" \
+  --extra-index-url https://download.pytorch.org/whl/cu128
+python -m pip install transformers huggingface_hub
 python -m pip freeze > "$VENV_PATH/romireason-hpc-freeze.txt"
 
 echo "HPC environment ready: $VENV_PATH"
