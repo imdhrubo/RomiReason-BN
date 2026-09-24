@@ -11,6 +11,7 @@
 
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+module load python/3.12.3
 VENV_PATH="${VENV_PATH:-$PWD/.venv-hpc}"
 export HF_HOME="${HF_HOME:-$PWD/.hf-cache}"
 if [[ ! -f "$VENV_PATH/bin/activate" ]]; then
