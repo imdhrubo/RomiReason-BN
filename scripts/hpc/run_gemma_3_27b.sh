@@ -14,6 +14,7 @@ cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 module load python/3.12.3
 VENV_PATH="${VENV_PATH:-$PWD/.venv-hpc}"
 export HF_HOME="${HF_HOME:-$PWD/.hf-cache}"
+RESULTS_ROOT="${ROMIREASON_RESULTS_ROOT:-$PWD/results}"
 if [[ ! -f "$VENV_PATH/bin/activate" ]]; then
   echo "Missing HPC virtual environment: $VENV_PATH. Run scripts/hpc/setup_hpc_venv.sh first." >&2
   exit 1
@@ -24,7 +25,7 @@ python scripts/hpc/run_vllm_jsonl.py \
   --jobs data/evaluation/primary_v1_1_inference_inputs/gemma-3-27b-it.jsonl \
   --shard-size 500 \
   --all-shards \
-  --output-dir results/primary_v1_1/gemma-3-27b-it/responses \
-  --event-dir results/primary_v1_1/gemma-3-27b-it/events \
+  --output-dir "$RESULTS_ROOT/primary_v1_1/gemma-3-27b-it/responses" \
+  --event-dir "$RESULTS_ROOT/primary_v1_1/gemma-3-27b-it/events" \
   --tensor-parallel-size 2 \
   --dtype bfloat16
