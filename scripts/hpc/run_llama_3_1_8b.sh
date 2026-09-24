@@ -2,7 +2,7 @@
 # One persistent allocation: edit only these site-specific resource lines.
 #SBATCH --partition=GPU
 #SBATCH --time=3-00:00:00
-#SBATCH --mem=128G
+#SBATCH --mem=80G
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:A100:2
 #SBATCH --job-name=rrbn-llama8b
