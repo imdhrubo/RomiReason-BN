@@ -13,8 +13,12 @@ set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 module load python/3.12.3
 VENV_PATH="${VENV_PATH:-$PWD/.venv-hpc}"
-export HF_HOME="${HF_HOME:-$PWD/.hf-cache}"
-RESULTS_ROOT="${ROMIREASON_RESULTS_ROOT:-$PWD/results}"
+RR_CACHE_ROOT="${ROMIREASON_CACHE_ROOT:-/scratch/$USER/romireason-bn-cache}"
+export HF_HOME="${HF_HOME:-$RR_CACHE_ROOT/hf}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$RR_CACHE_ROOT/xdg}"
+export VLLM_CACHE_ROOT="${VLLM_CACHE_ROOT:-$RR_CACHE_ROOT/vllm}"
+RESULTS_ROOT="${ROMIREASON_RESULTS_ROOT:-$RR_CACHE_ROOT/results}"
+mkdir -p "$HF_HOME" "$XDG_CACHE_HOME" "$VLLM_CACHE_ROOT" "$RESULTS_ROOT"
 if [[ ! -f "$VENV_PATH/bin/activate" ]]; then
   echo "Missing HPC virtual environment: $VENV_PATH. Run scripts/hpc/setup_hpc_venv.sh first." >&2
   exit 1
