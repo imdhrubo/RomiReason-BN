@@ -1,13 +1,12 @@
 #!/bin/bash
-# Edit only these site-specific resource lines before submission.
-#SBATCH --partition=CHANGE_ME
-#SBATCH --time=24:00:00
+# One persistent allocation: edit only these site-specific resource lines.
+#SBATCH --partition=GPU
+#SBATCH --time=3-00:00:00
 #SBATCH --mem=128G
 #SBATCH --cpus-per-task=16
-#SBATCH --gpus=2
-#SBATCH --array=0-234%1
+#SBATCH --gres=gpu:A100:2
 #SBATCH --job-name=rrbn-llama8b
-#SBATCH --output=slurm-rrbn-llama8b-%A_%a.out
+#SBATCH --output=slurm-rrbn-llama8b-%j.out
 
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -22,9 +21,9 @@ source "$VENV_PATH/bin/activate"
 
 python scripts/hpc/run_vllm_jsonl.py \
   --jobs data/evaluation/primary_v1_1_inference_inputs/llama-3-1-8b-instruct.jsonl \
-  --shard-index "$SLURM_ARRAY_TASK_ID" \
   --shard-size 500 \
-  --output "results/primary_v1_1/llama-3-1-8b-instruct/responses/shard-$(printf '%05d' "$SLURM_ARRAY_TASK_ID").jsonl" \
-  --event-log "results/primary_v1_1/llama-3-1-8b-instruct/events/shard-$(printf '%05d' "$SLURM_ARRAY_TASK_ID").jsonl" \
+  --all-shards \
+  --output-dir results/primary_v1_1/llama-3-1-8b-instruct/responses \
+  --event-dir results/primary_v1_1/llama-3-1-8b-instruct/events \
   --tensor-parallel-size 2 \
   --dtype bfloat16

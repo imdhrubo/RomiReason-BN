@@ -1,13 +1,12 @@
 #!/bin/bash
-# Edit only these site-specific resource lines before submission.
-#SBATCH --partition=CHANGE_ME
-#SBATCH --time=24:00:00
+# One persistent allocation: edit only these site-specific resource lines.
+#SBATCH --partition=GPU
+#SBATCH --time=3-00:00:00
 #SBATCH --mem=128G
 #SBATCH --cpus-per-task=16
-#SBATCH --gpus=2
-#SBATCH --array=0-234%1
+#SBATCH --gres=gpu:A100:2
 #SBATCH --job-name=rrbn-gemma27b
-#SBATCH --output=slurm-rrbn-gemma27b-%A_%a.out
+#SBATCH --output=slurm-rrbn-gemma27b-%j.out
 
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -22,9 +21,9 @@ source "$VENV_PATH/bin/activate"
 
 python scripts/hpc/run_vllm_jsonl.py \
   --jobs data/evaluation/primary_v1_1_inference_inputs/gemma-3-27b-it.jsonl \
-  --shard-index "$SLURM_ARRAY_TASK_ID" \
   --shard-size 500 \
-  --output "results/primary_v1_1/gemma-3-27b-it/responses/shard-$(printf '%05d' "$SLURM_ARRAY_TASK_ID").jsonl" \
-  --event-log "results/primary_v1_1/gemma-3-27b-it/events/shard-$(printf '%05d' "$SLURM_ARRAY_TASK_ID").jsonl" \
+  --all-shards \
+  --output-dir results/primary_v1_1/gemma-3-27b-it/responses \
+  --event-dir results/primary_v1_1/gemma-3-27b-it/events \
   --tensor-parallel-size 2 \
   --dtype bfloat16
