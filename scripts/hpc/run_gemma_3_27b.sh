@@ -10,7 +10,7 @@
 #SBATCH --error=slurm-rrbn-gemma27b-%j.err
 
 set -euo pipefail
-cd "$(dirname "$0")/../.."
+cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 module load python/3.12.3
 VENV_PATH="${VENV_PATH:-$PWD/.venv-hpc}"
 export HF_HOME="${HF_HOME:-$PWD/.hf-cache}"
