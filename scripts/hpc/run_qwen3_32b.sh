@@ -7,6 +7,7 @@
 #SBATCH --gres=gpu:A100:2
 #SBATCH --job-name=rrbn-qwen32b
 #SBATCH --output=slurm-rrbn-qwen32b-%j.out
+#SBATCH --error=slurm-rrbn-qwen32b-%j.err
 
 set -euo pipefail
 cd "$(dirname "$0")/../.."
