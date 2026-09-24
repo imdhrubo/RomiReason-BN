@@ -1,0 +1,51 @@
+{
+  "dataset": "data/release/romireason_bn_v1_19543.parquet",
+  "dataset_sha256": "1969a672710659815b117e8c391c666885d0384b4cd20aae3647e13cdc1c54b7",
+  "event_log_schema": "artifacts/evaluation/run_event_log_schema_v1.json",
+  "models": [
+    {
+      "forms": 117258,
+      "inference_jobs": "data/evaluation/primary_v1_1_inference_inputs/llama-3-1-8b-instruct.jsonl",
+      "inference_jobs_sha256": "8fcc143ee0096dcc1de556c24f8e5d77903aab1952f2e06c908253d6f02245f3",
+      "name": "Llama-3.1-8B-Instruct",
+      "repository": "meta-llama/Llama-3.1-8B-Instruct",
+      "run_event_log_directory": "artifacts/evaluation/run_logs/llama-3-1-8b-instruct/",
+      "scoring_key": "artifacts/evaluation/primary_v1_1_scoring_keys/llama-3-1-8b-instruct.jsonl",
+      "scoring_key_sha256": "173c36ecde176109200b9e314090fa66248f8cf697a72bdb20ab2d66e9acb606"
+    },
+    {
+      "forms": 117258,
+      "inference_jobs": "data/evaluation/primary_v1_1_inference_inputs/qwen3-32b.jsonl",
+      "inference_jobs_sha256": "c81cf1282d673b6555aa58967ba8efdad5184a6f07c0dc2a58f358137c2f3d99",
+      "name": "Qwen3-32B",
+      "repository": "Qwen/Qwen3-32B",
+      "run_event_log_directory": "artifacts/evaluation/run_logs/qwen3-32b/",
+      "scoring_key": "artifacts/evaluation/primary_v1_1_scoring_keys/qwen3-32b.jsonl",
+      "scoring_key_sha256": "6eadcfcd53c8effde1d8b502647195c5c9a4742b470c915d4fb4b3b5eed1d69b"
+    },
+    {
+      "forms": 117258,
+      "inference_jobs": "data/evaluation/primary_v1_1_inference_inputs/gemma-3-27b-it.jsonl",
+      "inference_jobs_sha256": "029b2e27b54bac23347237431fc4e30aa70405d877eb294fb4fae972f4283ae2",
+      "name": "Gemma-3-27B-it",
+      "repository": "google/gemma-3-27b-it",
+      "run_event_log_directory": "artifacts/evaluation/run_logs/gemma-3-27b-it/",
+      "scoring_key": "artifacts/evaluation/primary_v1_1_scoring_keys/gemma-3-27b-it.jsonl",
+      "scoring_key_sha256": "74dd1b6deb5c4080e2b54f904f2ad81541d93f8e6eba6c4d118eac4eb98453f7"
+    },
+    {
+      "forms": 117258,
+      "inference_jobs": "data/evaluation/primary_v1_1_inference_inputs/aya-expanse-32b.jsonl",
+      "inference_jobs_sha256": "0b1a5354ee7ffb0cd49ecaf87170b974e99075a5d8c5c3511f49e52be6fb7a87",
+      "name": "Aya Expanse 32B",
+      "repository": "CohereLabs/aya-expanse-32b",
+      "run_event_log_directory": "artifacts/evaluation/run_logs/aya-expanse-32b/",
+      "scoring_key": "artifacts/evaluation/primary_v1_1_scoring_keys/aya-expanse-32b.jsonl",
+      "scoring_key_sha256": "bef2b37d731bdce2630b6628c51de8e4e3d6c5c5d1b7feddeab942aac5c4b03d"
+    }
+  ],
+  "protocol": "configs/evaluation_protocol_v1_1.json",
+  "protocol_sha256": "816782ce858fd479e7f9b7276e09bd0cfef7896b03f788ec4841e59f3df2d6d7",
+  "status": "full_run_inputs_ready_no_inference_started",
+  "total_forms": 469032
+}

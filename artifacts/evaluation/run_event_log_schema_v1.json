@@ -1,0 +1,26 @@
+{
+  "description": "Append-only runtime event contract for every primary-model inference shard.",
+  "required_fields": [
+    "timestamp_utc",
+    "event",
+    "model_name",
+    "model_revision",
+    "tokenizer_revision",
+    "job_file_sha256",
+    "shard_id"
+  ],
+  "events": {
+    "run_started": ["runtime_versions", "device", "dtype_or_quantization", "total_forms"],
+    "shard_started": ["form_id_start", "form_id_end", "requested_forms"],
+    "shard_completed": ["completed_forms", "raw_response_file", "raw_response_sha256", "elapsed_seconds", "prompt_tokens", "completion_tokens", "truncation_count"],
+    "shard_failed": ["error_type", "error_message", "completed_forms"],
+    "alert": ["metric", "observed_value", "threshold", "completed_forms", "action"],
+    "run_completed": ["completed_forms", "missing_forms", "raw_response_manifest_sha256"]
+  },
+  "rules": [
+    "One JSON object per line.",
+    "Append events; never rewrite historical events.",
+    "Resume only missing or transport-failed form IDs.",
+    "Do not include expected answers in event logs or inference inputs."
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": 2,
+  "selection_status": "staged_primary_models_ready",
+  "selection_rationale": "Primary evaluation starts with Qwen3-32B, Gemma 3 27B IT, Aya Expanse 32B, and Llama 3.1 8B Instruct. The smaller Qwen, Gemma, and Aya models are retained as predeclared later extensions, independent of reviewer outcomes. No model is enabled for inference before dataset and protocol freeze.",
+  "models": [
+    {
+      "name": "Qwen3-8B",
+      "repository": "Qwen/Qwen3-8B",
+      "enabled": false,
+      "selected": false,
+      "evaluation_stage": "later_extension",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+      "tokenizer_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+      "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+      "license": "apache-2.0",
+      "access_status": "verified_public"
+    },
+    {
+      "name": "Llama-3.1-8B-Instruct",
+      "repository": "meta-llama/Llama-3.1-8B-Instruct",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "primary",
+      "analysis_role": "primary_cross_family",
+      "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "tokenizer_revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "tokenizer_sha256": "79e3e522635f3171300913bb421464a87de6222182a0570b9b2ccba2a964b2b4",
+      "license": "llama3.1",
+      "access_status": "verified_gated_access"
+    },
+    {
+      "name": "Gemma-3-4B-it",
+      "repository": "google/gemma-3-4b-it",
+      "enabled": false,
+      "selected": false,
+      "evaluation_stage": "later_extension",
+      "revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+      "tokenizer_revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+      "tokenizer_sha256": "4667f2089529e8e7657cfb6d1c19910ae71ff5f28aa7ab2ff2763330affad795",
+      "license": "gemma",
+      "access_status": "verified_gated_access"
+    },
+    {
+      "name": "Aya Expanse 8B",
+      "repository": "CohereLabs/aya-expanse-8b",
+      "enabled": false,
+      "selected": false,
+      "evaluation_stage": "later_extension",
+      "revision": "5062468bf9bc0c6035fd64e06274333ec127d980",
+      "tokenizer_revision": "5062468bf9bc0c6035fd64e06274333ec127d980",
+      "tokenizer_sha256": "c69a7ea6c0927dfac8c349186ebcf0466a4723c21cbdb2e850cf559f0bee92b8",
+      "license": "cc-by-nc-4.0",
+      "access_status": "verified_gated_noncommercial_access"
+    },
+    {
+      "name": "Qwen3-32B",
+      "repository": "Qwen/Qwen3-32B",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "primary",
+      "analysis_role": "primary_cross_family",
+      "paired_with": "Qwen3-8B",
+      "revision": "9216db5781bf21249d130ec9da846c4624c16137",
+      "tokenizer_revision": "9216db5781bf21249d130ec9da846c4624c16137",
+      "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+      "license": "apache-2.0",
+      "access_status": "verified_public"
+    },
+    {
+      "name": "Gemma-3-27B-it",
+      "repository": "google/gemma-3-27b-it",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "primary",
+      "analysis_role": "primary_cross_family",
+      "paired_with": "Gemma-3-4B-it",
+      "revision": "005ad3404e59d6023443cb575daa05336842228a",
+      "tokenizer_revision": "005ad3404e59d6023443cb575daa05336842228a",
+      "tokenizer_sha256": "4667f2089529e8e7657cfb6d1c19910ae71ff5f28aa7ab2ff2763330affad795",
+      "license": "gemma",
+      "access_status": "verified_gated_access"
+    },
+    {
+      "name": "Aya Expanse 32B",
+      "repository": "CohereLabs/aya-expanse-32b",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "primary",
+      "analysis_role": "primary_cross_family",
+      "paired_with": "Aya Expanse 8B",
+      "revision": "b306ea27e360683b50c005d7fcbad6a242317910",
+      "tokenizer_revision": "b306ea27e360683b50c005d7fcbad6a242317910",
+      "tokenizer_sha256": "c69a7ea6c0927dfac8c349186ebcf0466a4723c21cbdb2e850cf559f0bee92b8",
+      "license": "cc-by-nc-4.0",
+      "access_status": "verified_gated_noncommercial_access"
+    }
+  ]
+}

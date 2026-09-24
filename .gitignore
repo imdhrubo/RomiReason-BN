@@ -1,0 +1,59 @@
+# Local environment, credentials, caches, and editor/OS state
+.DS_Store
+.env
+.env.*
+.venv/
+.venv-*/
+.hf-cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Scheduler and inference outputs: transfer separately; never version them.
+results/
+slurm-*.out
+slurm-*.err
+data/evaluation/
+artifacts/evaluation/primary_v1_1_scoring_keys/
+artifacts/evaluation/run_logs/
+
+# Do not publish project documentation or local planning records from this
+# execution repository.
+docs/**
+!docs/.gitkeep
+NAACL_plan.md
+README.md
+Makefile
+scripts/manage_batch_shard.py
+
+# Exclude raw, interim, generation, review, and source-release artifacts.
+data/raw/**
+!data/raw/.gitkeep
+data/interim/**
+!data/interim/.gitkeep
+data/final/**
+!data/final/.gitkeep
+data/generation/
+data/review/
+data/examples/*
+!data/examples/pilot_example.jsonl
+data/release/**
+!data/release/romireason_bn_v1_19543.parquet
+
+# Keep only runtime model/evaluation configuration; generation configuration
+# stays local with the archival project materials.
+configs/generation/*
+!configs/generation/
+!configs/generation/rule_synthetic_v1.json
+configs/study.json
+configs/task_mapping.json
+
+# Keep only the manifests required to recreate and audit the HPC run.
+artifacts/**
+!artifacts/.gitkeep
+!artifacts/evaluation/
+artifacts/evaluation/*
+!artifacts/evaluation/primary_v1_1_full_run_manifest.json
+!artifacts/evaluation/run_event_log_schema_v1.json

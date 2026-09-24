@@ -1,0 +1,27 @@
+{
+  "catalog_version": "rule-synthetic-v1",
+  "description": "Conservative deterministic conversion from ISO-style Bengali Romanization to ASCII spellings. Rules apply only to canonical Romanization marks; formulas and existing non-Bengali notation remain unchanged.",
+  "seed": 2027,
+  "rules": [
+    {"id": "RBV1_VOCALIC_R", "find": "r̥", "replace": "ri"},
+    {"id": "RBV1_CHANDRABINDU", "find": "m̐", "replace": "m"},
+    {"id": "RBV1_LONG_A", "find": "ā", "replace": "a"},
+    {"id": "RBV1_LONG_E", "find": "ē", "replace": "e"},
+    {"id": "RBV1_LONG_I", "find": "ī", "replace": "i"},
+    {"id": "RBV1_LONG_U", "find": "ū", "replace": "u"},
+    {"id": "RBV1_SHORT_U", "find": "ŭ", "replace": "u"},
+    {"id": "RBV1_LONG_O", "find": "ō", "replace": "o"},
+    {"id": "RBV1_RRA", "find": "ṛ", "replace": "r"},
+    {"id": "RBV1_RETROFLEX_T", "find": "ṭ", "replace": "t"},
+    {"id": "RBV1_RETROFLEX_D", "find": "ḍ", "replace": "d"},
+    {"id": "RBV1_RETROFLEX_N", "find": "ṇ", "replace": "n"},
+    {"id": "RBV1_VELAR_NASAL", "find": "ṅ", "replace": "ng"},
+    {"id": "RBV1_PALATAL_NASAL", "find": "ñ", "replace": "n"},
+    {"id": "RBV1_SIBILANT_SHA", "find": "ś", "replace": "sh"},
+    {"id": "RBV1_SIBILANT_SSA", "find": "ṣ", "replace": "sh"},
+    {"id": "RBV1_ANTAHSTHA_Y", "find": "ẏ", "replace": "y"},
+    {"id": "RBV1_ANUSVARA", "find": "ṁ", "replace": "m"},
+    {"id": "RBV1_VISARGA", "find": "ḥ", "replace": "h"}
+  ],
+  "identity_rule_id": "RBV1_IDENTITY_NO_ELIGIBLE_MARK"
+}
