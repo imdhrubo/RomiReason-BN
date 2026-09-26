@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import random
 from collections import defaultdict
 from collections.abc import Iterable
 from typing import Any
+
+import numpy as np
 
 
 def item_level_outcomes(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -32,10 +33,18 @@ def item_level_outcomes(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def paired_bootstrap(outcomes: list[dict[str, Any]], left: str, right: str, replicates: int, seed: int) -> dict[str, float]:
     """Item-resampled paired difference: mean(left - right), percentile interval."""
-    differences = [float(row[left]) - float(row[right]) for row in outcomes]
-    point = sum(differences) / len(differences)
-    rng = random.Random(seed)
-    draws = sorted(sum(rng.choice(differences) for _ in differences) / len(differences) for _ in range(replicates))
+    differences = np.fromiter(
+        (float(row[left]) - float(row[right]) for row in outcomes), dtype=np.float64
+    )
+    point = float(differences.mean())
+    # Each paired difference is -1, 0, or 1.  A multinomial draw of their
+    # observed frequencies is exactly equivalent to sampling items with
+    # replacement, but avoids materializing a 10,000 × 19,543 matrix.
+    frequencies = np.array([(differences == value).sum() for value in (-1, 0, 1)], dtype=np.float64)
+    draws_by_value = np.random.default_rng(seed).multinomial(
+        len(differences), frequencies / len(differences), size=replicates
+    )
+    draws = np.sort((draws_by_value[:, 2] - draws_by_value[:, 0]) / len(differences))
     return {"estimate": point, "ci_2_5": draws[int(.025 * (replicates - 1))], "ci_97_5": draws[int(.975 * (replicates - 1))]}
 
 

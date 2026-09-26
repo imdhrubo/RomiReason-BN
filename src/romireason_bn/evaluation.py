@@ -17,6 +17,10 @@ import pyarrow as pa
 _BENGALI_DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
 _MCQ = re.compile(r"^(?:answer\s*[:=-]?\s*)?([A-D])\s*[).,:]?\s*$", re.IGNORECASE)
 _FINAL_TAG = re.compile(r"<final>\s*(.*?)\s*</final>\s*$", re.DOTALL | re.IGNORECASE)
+_THINK_ANSWER_TAGS = re.compile(
+    r"^\s*<think>\s*.*?\s*</think>\s*<answer>\s*(.*?)\s*</answer>\s*$",
+    re.DOTALL | re.IGNORECASE,
+)
 _OPTION = re.compile(r"^(?:option|বিকল্প)?\s*([12])$", re.IGNORECASE)
 
 
@@ -48,6 +52,34 @@ def write_parquet_rows(path: Path, rows: Iterable[dict[str, Any]]) -> None:
     materialized = list(rows)
     path.parent.mkdir(parents=True, exist_ok=True)
     pq.write_table(pa.Table.from_pylist(materialized), path)
+
+
+def load_response_rows(path: Path) -> list[dict[str, Any]]:
+    """Load one response JSONL file or a directory of completed response shards.
+
+    Shards are consumed in lexical order and must not repeat a form identifier.
+    This permits scoring immutable HPC output directly, without concatenating or
+    modifying raw response artifacts.
+    """
+    paths = [path] if path.is_file() else sorted(path.glob("shard-*.jsonl"))
+    if not paths:
+        raise ValueError(f"no response JSONL files found at {path}")
+    rows: list[dict[str, Any]] = []
+    form_ids: set[str] = set()
+    for response_path in paths:
+        with response_path.open(encoding="utf-8") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                form_id = str(row.get("form_id", ""))
+                if not form_id:
+                    raise ValueError(f"{response_path}:{line_number}: response has no form_id")
+                if form_id in form_ids:
+                    raise ValueError(f"duplicate response form_id: {form_id}")
+                form_ids.add(form_id)
+                rows.append(row)
+    return rows
 
 
 def stratified_smoke_rows(
@@ -152,12 +184,23 @@ def _parse_schema_aware_final(output_text: str, expected_answer: str) -> tuple[s
     return "parsed", parsed == expected
 
 
+def _parse_schema_aware_think_answer(output_text: str, expected_answer: str) -> tuple[str, bool]:
+    """Require the v1.2 think/answer envelope and score its answer field."""
+    match = _THINK_ANSWER_TAGS.fullmatch(output_text)
+    if match is None:
+        return "unscorable", False
+    # Reuse the exact answer normalization and schema handling from v1.1.
+    return _parse_schema_aware_final(f"<final>{match.group(1)}</final>", expected_answer)
+
+
 def parse_and_score(
     output_text: str, expected_answer: str, parser: str = "strict_answer_only_v1"
 ) -> tuple[str, bool]:
     """Score answer-only outputs without explanation extraction or repair."""
     if parser == "final_tag_schema_aware_v1":
         return _parse_schema_aware_final(output_text, expected_answer)
+    if parser == "think_answer_schema_aware_v1":
+        return _parse_schema_aware_think_answer(output_text, expected_answer)
     if parser != "strict_answer_only_v1":
         raise ValueError(f"unknown scoring parser: {parser}")
     expected = _normalized(expected_answer)

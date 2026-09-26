@@ -14,7 +14,7 @@ from .llm_generation import build_batch_requests, build_retry_requests, sha256_t
 from .llm_validation import validate_batch_rows
 from .rule_synthetic import build_rule_synthetic_records, load_rule_catalog
 from .review_export import assemble_paired_candidate, export_hf_task_release, export_review_candidate, freeze_reviewed_release
-from .evaluation import build_evaluation_jobs, load_parquet_rows, load_protocol, score_responses, split_inference_and_scoring_jobs, stratified_smoke_rows, write_parquet_rows
+from .evaluation import build_evaluation_jobs, load_parquet_rows, load_protocol, load_response_rows, score_responses, split_inference_and_scoring_jobs, stratified_smoke_rows, write_parquet_rows
 from .analysis import analysis_summary
 from .model_planning import build_model_run_plan
 from .curation import (
@@ -1082,7 +1082,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"HF_TASK_RELEASE_OK items={summary['items']} columns={summary['columns']}")
         return 0
     if args.command == "score-evaluation-responses":
-        scored = score_responses(read_jsonl_rows(args.jobs), read_jsonl_rows(args.responses))
+        scored = score_responses(read_jsonl_rows(args.jobs), load_response_rows(args.responses))
         write_jsonl_rows(args.output, scored)
         print(f"EVALUATION_SCORED_OK forms={len(scored)}")
         return 0
