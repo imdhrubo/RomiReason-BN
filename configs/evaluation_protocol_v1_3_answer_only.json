@@ -1,0 +1,12 @@
+{
+  "protocol_version": "evaluation-v1.3-answer-only",
+  "status": "frozen",
+  "compares_with": "evaluation-v1.2",
+  "experiment_role": "secondary_prompt_ablation_no_visible_reasoning",
+  "change_rationale": "Tests whether visible step-by-step reasoning drives the v1.1 formatting/truncation failures or the observed Romanization robustness gaps. The cohort, models, paired conditions, conversation framing, task instructions, deterministic decoding, 2048-token budget, and answer matcher are held fixed.",
+  "chat_template_kwargs_by_repository": {"Qwen/Qwen3-32B": {"enable_thinking": false}},
+  "prompt_template": "A conversation takes place between the user and the assistant. The user asks questions, and the assistant solves them. The assistant provides the final answer without providing reasoning. The final answer must be enclosed within <answer></answer> tags:\n<answer>final answer</answer>\n\nInside the answer tag:\n- If the item provides answer choices, write only the selected choice label exactly as shown.\n- If it presents a premise and hypothesis, write exactly one of: Entailment, Contradiction, Neutral.\n- If the answer is numeric, write only the value in standard notation, with no unit.\n- Otherwise, write only the concise answer.\n\nQuestion: {item_text}",
+  "decoding": {"temperature": 0, "top_p": 1, "max_output_tokens": 2048},
+  "scoring": {"parser": "answer_only_schema_aware_v1", "free_response_normalization": "nfc_whitespace_bengali_digits_casefold_v1", "numeric_normalization": "exact_rational_and_ratio_v1"},
+  "analysis": {"bootstrap_replicates": 10000, "bootstrap_seed": 2027, "primary_endpoint": "all_forms_same_and_correct", "llm_item_aggregation": "all_three_correct", "multiple_testing": "holm"}
+}

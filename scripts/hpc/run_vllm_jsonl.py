@@ -115,9 +115,14 @@ def main() -> None:
                                 "form_id_start": rows[0]["form_id"], "form_id_end": rows[-1]["form_id"],
                                 "requested_forms": len(rows)})
         try:
+            chat_template_kwargs = rows[0].get("chat_template_kwargs", {})
+            if not isinstance(chat_template_kwargs, dict):
+                raise ValueError("chat_template_kwargs must be an object")
+            if any(row.get("chat_template_kwargs", {}) != chat_template_kwargs for row in rows):
+                raise ValueError("a shard must contain one chat-template configuration")
             prompts = [tokenizer.apply_chat_template(
                 [{"role": "user", "content": row["prompt"]}],
-                tokenize=False, add_generation_prompt=True,
+                tokenize=False, add_generation_prompt=True, **chat_template_kwargs,
             ) for row in rows]
             decoding = rows[0]["decoding"]
             if any(row["decoding"] != decoding for row in rows):

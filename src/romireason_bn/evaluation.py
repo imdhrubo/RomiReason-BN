@@ -21,6 +21,7 @@ _THINK_ANSWER_TAGS = re.compile(
     r"^\s*<think>\s*.*?\s*</think>\s*<answer>\s*(.*?)\s*</answer>\s*$",
     re.DOTALL | re.IGNORECASE,
 )
+_ANSWER_ONLY_TAG = re.compile(r"^\s*<answer>\s*(.*?)\s*</answer>\s*$", re.DOTALL | re.IGNORECASE)
 _OPTION = re.compile(r"^(?:option|বিকল্প)?\s*([12])$", re.IGNORECASE)
 
 
@@ -104,6 +105,12 @@ def stratified_smoke_rows(
 def build_evaluation_jobs(dataset_rows: list[dict[str, Any]], protocol: dict[str, Any], model: dict[str, Any]) -> list[dict[str, Any]]:
     """Create answer-key-free model inputs and separate scoring metadata."""
     assert_evaluation_ready(dataset_rows, protocol, model)
+    template_kwargs_by_repository = protocol.get("chat_template_kwargs_by_repository", {})
+    if not isinstance(template_kwargs_by_repository, dict):
+        raise ValueError("chat_template_kwargs_by_repository must be an object")
+    chat_template_kwargs = template_kwargs_by_repository.get(model["repository"], {})
+    if not isinstance(chat_template_kwargs, dict):
+        raise ValueError(f"chat-template kwargs for {model['repository']} must be an object")
     jobs: list[dict[str, Any]] = []
     for item in dataset_rows:
         forms = [("native", 1, item["native_text"]), ("canonical", 1, item["canonical_text"])]
@@ -116,6 +123,7 @@ def build_evaluation_jobs(dataset_rows: list[dict[str, Any]], protocol: dict[str
                 "variant_id": variant_id, "task_type": item["task_type"], "expected_answer": item["answer"],
                 "model": {key: model[key] for key in ("name", "repository", "revision", "tokenizer_revision", "tokenizer_sha256")},
                 "decoding": protocol["decoding"], "scoring": protocol["scoring"],
+                "chat_template_kwargs": chat_template_kwargs,
                 "prompt": protocol["prompt_template"].format(item_text=text),
             })
     return jobs
@@ -193,6 +201,14 @@ def _parse_schema_aware_think_answer(output_text: str, expected_answer: str) -> 
     return _parse_schema_aware_final(f"<final>{match.group(1)}</final>", expected_answer)
 
 
+def _parse_schema_aware_answer_only(output_text: str, expected_answer: str) -> tuple[str, bool]:
+    """Require a single answer tag for the no-visible-reasoning ablation."""
+    match = _ANSWER_ONLY_TAG.fullmatch(output_text)
+    if match is None:
+        return "unscorable", False
+    return _parse_schema_aware_final(f"<final>{match.group(1)}</final>", expected_answer)
+
+
 def parse_and_score(
     output_text: str, expected_answer: str, parser: str = "strict_answer_only_v1"
 ) -> tuple[str, bool]:
@@ -201,6 +217,8 @@ def parse_and_score(
         return _parse_schema_aware_final(output_text, expected_answer)
     if parser == "think_answer_schema_aware_v1":
         return _parse_schema_aware_think_answer(output_text, expected_answer)
+    if parser == "answer_only_schema_aware_v1":
+        return _parse_schema_aware_answer_only(output_text, expected_answer)
     if parser != "strict_answer_only_v1":
         raise ValueError(f"unknown scoring parser: {parser}")
     expected = _normalized(expected_answer)

@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from romireason_bn.analysis import analysis_summary, item_level_outcomes  # noqa: E402
-from romireason_bn.evaluation import load_response_rows, parse_and_score, split_inference_and_scoring_jobs, stratified_smoke_rows  # noqa: E402
+from romireason_bn.evaluation import build_evaluation_jobs, load_response_rows, parse_and_score, split_inference_and_scoring_jobs, stratified_smoke_rows  # noqa: E402
 from romireason_bn.model_planning import build_model_run_plan  # noqa: E402
 
 
@@ -37,12 +37,30 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(parse_and_score("<answer>A</answer>", "A", parser), ("unscorable", False))
         self.assertEqual(parse_and_score("<think>work</think><answer>A</answer> extra", "A", parser), ("unscorable", False))
 
+    def test_answer_only_schema_aware_scoring(self):
+        parser = "answer_only_schema_aware_v1"
+        self.assertEqual(parse_and_score("<answer>3</answer>", "৩", parser), ("parsed", True))
+        self.assertEqual(parse_and_score("<answer>Neutral</answer>", "neutral", parser), ("parsed", True))
+        self.assertEqual(parse_and_score("reasoning <answer>A</answer>", "A", parser), ("unscorable", False))
+
     def test_inference_jobs_do_not_contain_answer_keys(self):
         jobs = [{"form_id": "x", "prompt": "solve", "expected_answer": "A", "task_type": "math_reasoning"}]
         inference, scoring = split_inference_and_scoring_jobs(jobs)
         self.assertNotIn("expected_answer", inference[0])
         self.assertNotIn("prompt", scoring[0])
         self.assertEqual(scoring[0]["expected_answer"], "A")
+
+    def test_evaluation_jobs_preserve_model_specific_template_kwargs(self):
+        rows = [{"item_id": "item-1", "review_status": "frozen", "task_type": "math_reasoning", "answer": "A",
+                 "native_text": "native", "canonical_text": "canonical",
+                 "llm_generated_variants": [{"variant_id": 1, "text": "one"}, {"variant_id": 2, "text": "two"}, {"variant_id": 3, "text": "three"}],
+                 "rule_synthetic_text": "synthetic"}]
+        protocol = {"status": "frozen", "prompt_template": "{item_text}", "decoding": {}, "scoring": {},
+                    "chat_template_kwargs_by_repository": {"example/Qwen": {"enable_thinking": False}}}
+        model = {"name": "example", "repository": "example/Qwen", "revision": "r", "tokenizer_revision": "r", "tokenizer_sha256": "h"}
+        jobs = build_evaluation_jobs(rows, protocol, model)
+        self.assertEqual(len(jobs), 6)
+        self.assertEqual(jobs[0]["chat_template_kwargs"], {"enable_thinking": False})
 
     def test_response_shard_directory_loads_in_order_and_rejects_duplicates(self):
         with tempfile.TemporaryDirectory() as temporary:
