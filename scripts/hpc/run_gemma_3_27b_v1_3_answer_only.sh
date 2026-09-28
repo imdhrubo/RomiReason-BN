@@ -16,7 +16,8 @@ export HF_HOME="${HF_HOME:-$RR_CACHE_ROOT/hf}"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$RR_CACHE_ROOT/xdg}"
 export VLLM_CACHE_ROOT="${VLLM_CACHE_ROOT:-$RR_CACHE_ROOT/vllm}"
 RESULTS_ROOT="${ROMIREASON_RESULTS_ROOT:-$RR_CACHE_ROOT/results}"
-mkdir -p "$HF_HOME" "$XDG_CACHE_HOME" "$VLLM_CACHE_ROOT" "$RESULTS_ROOT"
+EVALUATION_ROOT="${ROMIREASON_EVALUATION_ROOT:-$RR_CACHE_ROOT/evaluation}"
+mkdir -p "$HF_HOME" "$XDG_CACHE_HOME" "$VLLM_CACHE_ROOT" "$RESULTS_ROOT" "$EVALUATION_ROOT"
 [[ -f "$VENV_PATH/bin/activate" ]] || { echo "Missing HPC virtual environment: $VENV_PATH" >&2; exit 1; }
 source "$VENV_PATH/bin/activate"
-python scripts/hpc/run_vllm_jsonl.py --jobs data/evaluation/primary_v1_3_answer_only_inference_inputs/gemma-3-27b-it.jsonl --shard-size 500 --all-shards --output-dir "$RESULTS_ROOT/primary_v1_3_answer_only/gemma-3-27b-it/responses" --event-dir "$RESULTS_ROOT/primary_v1_3_answer_only/gemma-3-27b-it/events" --tensor-parallel-size 2 --dtype bfloat16
+python scripts/hpc/run_vllm_jsonl.py --jobs "$EVALUATION_ROOT/primary_v1_3_answer_only_inference_inputs/gemma-3-27b-it.jsonl" --shard-size 500 --all-shards --output-dir "$RESULTS_ROOT/primary_v1_3_answer_only/gemma-3-27b-it/responses" --event-dir "$RESULTS_ROOT/primary_v1_3_answer_only/gemma-3-27b-it/events" --tensor-parallel-size 2 --dtype bfloat16
