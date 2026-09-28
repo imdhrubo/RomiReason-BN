@@ -1,10 +1,10 @@
 #!/bin/bash
 # One persistent allocation: edit only these site-specific resource lines.
-#SBATCH --partition=GPU
-#SBATCH --time=3-00:00:00
+#SBATCH --partition=Nebula_GPU
+#SBATCH --time=2-00:00:00
 #SBATCH --mem=80G
 #SBATCH --cpus-per-task=16
-#SBATCH --gres=gpu:A100:2
+#SBATCH --gres=gpu:L40S:2
 #SBATCH --job-name=rrbn-gemma27-v12
 #SBATCH --output=slurm-rrbn-gemma27-v12-%j.out
 #SBATCH --error=slurm-rrbn-gemma27-v12-%j.err
