@@ -32,6 +32,8 @@ def parquet_paths(values: list[str]) -> list[Path]:
         candidate = Path(value)
         if candidate.is_dir():
             paths.extend(sorted(candidate.glob("*.parquet")))
+        elif candidate.is_file():
+            paths.append(candidate)
         else:
             paths.extend(sorted(Path().glob(value)))
     if not paths:
