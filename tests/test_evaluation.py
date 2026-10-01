@@ -61,6 +61,18 @@ class EvaluationTests(unittest.TestCase):
         jobs = build_evaluation_jobs(rows, protocol, model)
         self.assertEqual(len(jobs), 6)
         self.assertEqual(jobs[0]["chat_template_kwargs"], {"enable_thinking": False})
+        self.assertEqual(jobs[0]["prompt_renderer"], "chat_template_v1")
+
+    def test_evaluation_jobs_preserve_model_prompt_renderer(self):
+        rows = [{"item_id": "item-1", "review_status": "frozen", "task_type": "math_reasoning", "answer": "A",
+                 "native_text": "native", "canonical_text": "canonical",
+                 "llm_generated_variants": [{"variant_id": 1, "text": "one"}, {"variant_id": 2, "text": "two"}, {"variant_id": 3, "text": "three"}],
+                 "rule_synthetic_text": "synthetic"}]
+        protocol = {"status": "frozen", "prompt_template": "{item_text}", "decoding": {}, "scoring": {}}
+        model = {"name": "example", "repository": "example/Bong", "revision": "r", "tokenizer_revision": "r", "tokenizer_sha256": "h",
+                 "prompt_renderer": "bangla_instruction_response_v1"}
+        jobs = build_evaluation_jobs(rows, protocol, model)
+        self.assertEqual(jobs[0]["prompt_renderer"], "bangla_instruction_response_v1")
 
     def test_response_shard_directory_loads_in_order_and_rejects_duplicates(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -51,6 +51,27 @@ def shard_count(path: Path, shard_size: int) -> int:
     return (total + shard_size - 1) // shard_size
 
 
+def render_prompts(tokenizer, rows: list[dict]) -> list[str]:
+    """Render a model's documented input envelope without changing task content."""
+    prompt_renderer = rows[0].get("prompt_renderer", "chat_template_v1")
+    if any(row.get("prompt_renderer", "chat_template_v1") != prompt_renderer for row in rows):
+        raise ValueError("a shard must contain one prompt renderer")
+    if prompt_renderer == "bangla_instruction_response_v1":
+        # Official BongLLaMA instruction format; no system prompt is published.
+        return [f"### Instruction:\n{row['prompt']}\n\n### Response:\n" for row in rows]
+    if prompt_renderer != "chat_template_v1":
+        raise ValueError(f"unknown prompt renderer: {prompt_renderer}")
+    chat_template_kwargs = rows[0].get("chat_template_kwargs", {})
+    if not isinstance(chat_template_kwargs, dict):
+        raise ValueError("chat_template_kwargs must be an object")
+    if any(row.get("chat_template_kwargs", {}) != chat_template_kwargs for row in rows):
+        raise ValueError("a shard must contain one chat-template configuration")
+    return [tokenizer.apply_chat_template(
+        [{"role": "user", "content": row["prompt"]}],
+        tokenize=False, add_generation_prompt=True, **chat_template_kwargs,
+    ) for row in rows]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--jobs", type=Path, required=True)
@@ -115,15 +136,7 @@ def main() -> None:
                                 "form_id_start": rows[0]["form_id"], "form_id_end": rows[-1]["form_id"],
                                 "requested_forms": len(rows)})
         try:
-            chat_template_kwargs = rows[0].get("chat_template_kwargs", {})
-            if not isinstance(chat_template_kwargs, dict):
-                raise ValueError("chat_template_kwargs must be an object")
-            if any(row.get("chat_template_kwargs", {}) != chat_template_kwargs for row in rows):
-                raise ValueError("a shard must contain one chat-template configuration")
-            prompts = [tokenizer.apply_chat_template(
-                [{"role": "user", "content": row["prompt"]}],
-                tokenize=False, add_generation_prompt=True, **chat_template_kwargs,
-            ) for row in rows]
+            prompts = render_prompts(tokenizer, rows)
             decoding = rows[0]["decoding"]
             if any(row["decoding"] != decoding for row in rows):
                 raise ValueError("a shard must contain one decoding configuration")

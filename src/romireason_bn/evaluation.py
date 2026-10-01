@@ -111,6 +111,9 @@ def build_evaluation_jobs(dataset_rows: list[dict[str, Any]], protocol: dict[str
     chat_template_kwargs = template_kwargs_by_repository.get(model["repository"], {})
     if not isinstance(chat_template_kwargs, dict):
         raise ValueError(f"chat-template kwargs for {model['repository']} must be an object")
+    prompt_renderer = model.get("prompt_renderer", "chat_template_v1")
+    if prompt_renderer not in {"chat_template_v1", "bangla_instruction_response_v1"}:
+        raise ValueError(f"unknown prompt renderer: {prompt_renderer}")
     jobs: list[dict[str, Any]] = []
     for item in dataset_rows:
         forms = [("native", 1, item["native_text"]), ("canonical", 1, item["canonical_text"])]
@@ -124,6 +127,7 @@ def build_evaluation_jobs(dataset_rows: list[dict[str, Any]], protocol: dict[str
                 "model": {key: model[key] for key in ("name", "repository", "revision", "tokenizer_revision", "tokenizer_sha256")},
                 "decoding": protocol["decoding"], "scoring": protocol["scoring"],
                 "chat_template_kwargs": chat_template_kwargs,
+                "prompt_renderer": prompt_renderer,
                 "prompt": protocol["prompt_template"].format(item_text=text),
             })
     return jobs
