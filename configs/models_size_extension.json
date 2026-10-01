@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "selection_status": "planned_secondary_within_family_size_extension",
-  "selection_rationale": "These predeclared smaller checkpoints extend the primary cross-family evaluation with within-family size comparisons. They use the unchanged evaluation-v1.2 protocol and are analyzed as a secondary extension, not pooled with the primary model set.",
+  "selection_rationale": "These predeclared smaller checkpoints extend the primary cross-family evaluation with within-family size comparisons. They use the frozen evaluation-v1.2 reasoning and v1.3 answer-only protocols and are analyzed as a secondary extension, not pooled with the primary model set.",
   "models": [
     {
       "name": "Qwen3-8B",
