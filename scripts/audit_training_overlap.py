@@ -8,6 +8,7 @@ from opaque or web-scale pretraining corpora.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 import unicodedata
@@ -26,18 +27,19 @@ def compact_text(value: Any) -> str:
     return re.sub(r"[^\w]+", "", normalized_text(value), flags=re.UNICODE)
 
 
-def parquet_paths(values: list[str]) -> list[Path]:
+def training_paths(values: list[str]) -> list[Path]:
     paths: list[Path] = []
     for value in values:
         candidate = Path(value)
         if candidate.is_dir():
             paths.extend(sorted(candidate.glob("*.parquet")))
+            paths.extend(sorted(candidate.glob("*.csv")))
         elif candidate.is_file():
             paths.append(candidate)
         else:
             paths.extend(sorted(Path().glob(value)))
     if not paths:
-        raise ValueError("no training parquet files found")
+        raise ValueError("no training Parquet or CSV files found")
     return paths
 
 
@@ -45,7 +47,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--evaluation", type=Path, required=True)
     parser.add_argument("--training", nargs="+", required=True,
-                        help="Parquet paths, directories, or glob patterns")
+                        help="Parquet/CSV paths, directories, or glob patterns")
     parser.add_argument("--training-columns", nargs="+", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--max-examples", type=int, default=10)
@@ -65,15 +67,40 @@ def main() -> None:
         column: {"exact": [], "compact": []} for column in args.training_columns
     }
     scanned_rows = 0
-    paths = parquet_paths(args.training)
+    paths = training_paths(args.training)
     for path in paths:
-        schema_names = set(pq.ParquetFile(path).schema.names)
-        missing = set(args.training_columns) - schema_names
-        if missing:
-            raise ValueError(f"{path} lacks requested columns: {sorted(missing)}")
-        table = pq.read_table(path, columns=args.training_columns)
-        scanned_rows += table.num_rows
-        for row in table.to_pylist():
+        if path.suffix == ".parquet":
+            schema_names = set(pq.ParquetFile(path).schema.names)
+            missing = set(args.training_columns) - schema_names
+            if missing:
+                raise ValueError(f"{path} lacks requested columns: {sorted(missing)}")
+            rows = pq.read_table(path, columns=args.training_columns).to_pylist()
+        elif path.suffix == ".csv":
+            with path.open(encoding="utf-8-sig", newline="") as handle:
+                reader = csv.DictReader(handle)
+                fieldnames = set(reader.fieldnames or [])
+                missing = set(args.training_columns) - fieldnames
+                if missing:
+                    raise ValueError(f"{path} lacks requested columns: {sorted(missing)}")
+                rows = ({column: row[column] for column in args.training_columns} for row in reader)
+                for row in rows:
+                    scanned_rows += 1
+                    for column in args.training_columns:
+                        value = row[column]
+                        for kind, index in (("exact", exact_to_ids), ("compact", compact_to_ids)):
+                            normalized = normalized_text(value) if kind == "exact" else compact_text(value)
+                            item_ids = index.get(normalized, [])
+                            matches[column][kind].update(item_ids)
+                            if item_ids and len(examples[column][kind]) < args.max_examples:
+                                examples[column][kind].append({
+                                    "item_id": item_ids[0],
+                                    "training_excerpt": normalized_text(value)[:300],
+                                })
+            continue
+        else:
+            raise ValueError(f"unsupported training-file suffix: {path}")
+        scanned_rows += len(rows)
+        for row in rows:
             for column in args.training_columns:
                 value = row[column]
                 for kind, index in (("exact", exact_to_ids), ("compact", compact_to_ids)):
