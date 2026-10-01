@@ -1,0 +1,27 @@
+{
+  "schema_version": 2,
+  "selection_status": "training_overlap_audited_secondary_full_run",
+  "selection_rationale": "TigerLLM is a peer-reviewed ACL 2025 general-purpose Bangla LLM. Its disclosed February 2025 99,989-row Bangla-Instruct release and disclosed Bangla-TextBook corpus showed zero direct exact or normalized matches against the 19,543 frozen items. The paper previously reports BEnQA evaluation; this is disclosed as prior benchmark exposure, not documented training overlap.",
+  "models": [
+    {
+      "name": "TigerLLM-9B-it",
+      "repository": "md-nishat-008/TigerLLM-9B-it",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "secondary_bengali_specialization_full_run",
+      "analysis_role": "bengali_specialized_model",
+      "reported_parameter_count": "9B",
+      "checkpoint_tensor_parameters": 12187325040,
+      "revision": "b939ab5fb3953d99c2b814fc6ba09f65d48aacd9",
+      "tokenizer_revision": "b939ab5fb3953d99c2b814fc6ba09f65d48aacd9",
+      "tokenizer_sha256": "1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c",
+      "license": "cc-by-4.0",
+      "access_status": "verified_public",
+      "training_overlap_audits": [
+        "artifacts/contamination/tigerllm_bangla_instruct_training_release_direct_overlap.json",
+        "artifacts/contamination/tigerllm_bangla_textbook_direct_overlap.json"
+      ],
+      "prior_evaluation_exposure": ["BEnQA"]
+    }
+  ]
+}
