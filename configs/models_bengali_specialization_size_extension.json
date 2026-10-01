@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "selection_status": "contamination_audited_secondary_within_family_size_extension",
+  "selection_rationale": "This is the 13B instruction counterpart to the separately evaluated BongLLaMA 7B model. The model card documents Bangla-Alpaca-Orca instruction tuning. Its 172,026 public rows had zero direct exact or normalized matches against the 19,543 frozen benchmark items; this cannot rule out undocumented web-pretraining overlap.",
+  "models": [
+    {
+      "name": "BongLLaMA-13B-Instruct-v0.1",
+      "repository": "BanglaLLM/bangla-llama-13b-instruct-v0.1",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "secondary_bengali_specialization_size_extension",
+      "analysis_role": "within_family_size_pair",
+      "paired_with": "BongLLaMA-7B-Instruct-v0.1",
+      "revision": "a5986f8599cd749ab4e8a2afb068b881493dac28",
+      "tokenizer_revision": "a5986f8599cd749ab4e8a2afb068b881493dac28",
+      "tokenizer_sha256": "dd5d056e6dcdd3e5a32d494caaf52acd763b562be958a4f354b3967c11cea896",
+      "prompt_renderer": "bangla_instruction_response_v1",
+      "license": "llama2",
+      "access_status": "verified_public",
+      "contamination_audit": "artifacts/contamination/bongllama_13b_bangla_alpaca_orca_direct_overlap.json"
+    }
+  ]
+}
