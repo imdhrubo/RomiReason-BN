@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "selection_status": "planned_secondary_within_family_size_extension",
+  "selection_rationale": "These predeclared smaller checkpoints extend the primary cross-family evaluation with within-family size comparisons. They use the unchanged evaluation-v1.2 protocol and are analyzed as a secondary extension, not pooled with the primary model set.",
+  "models": [
+    {
+      "name": "Qwen3-8B",
+      "repository": "Qwen/Qwen3-8B",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "secondary_size_extension",
+      "analysis_role": "within_family_size_pair",
+      "paired_with": "Qwen3-32B",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+      "tokenizer_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+      "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+      "license": "apache-2.0",
+      "access_status": "verified_public"
+    },
+    {
+      "name": "Gemma-3-4B-it",
+      "repository": "google/gemma-3-4b-it",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "secondary_size_extension",
+      "analysis_role": "within_family_size_pair",
+      "paired_with": "Gemma-3-27B-it",
+      "revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+      "tokenizer_revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+      "tokenizer_sha256": "4667f2089529e8e7657cfb6d1c19910ae71ff5f28aa7ab2ff2763330affad795",
+      "license": "gemma",
+      "access_status": "verified_gated_access"
+    },
+    {
+      "name": "Aya Expanse 8B",
+      "repository": "CohereLabs/aya-expanse-8b",
+      "enabled": false,
+      "selected": true,
+      "evaluation_stage": "secondary_size_extension",
+      "analysis_role": "within_family_size_pair",
+      "paired_with": "Aya Expanse 32B",
+      "revision": "5062468bf9bc0c6035fd64e06274333ec127d980",
+      "tokenizer_revision": "5062468bf9bc0c6035fd64e06274333ec127d980",
+      "tokenizer_sha256": "c69a7ea6c0927dfac8c349186ebcf0466a4723c21cbdb2e850cf559f0bee92b8",
+      "license": "cc-by-nc-4.0",
+      "access_status": "verified_gated_noncommercial_access"
+    }
+  ]
+}
