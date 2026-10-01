@@ -85,6 +85,10 @@ def main() -> None:
     parser.add_argument("--event-dir", type=Path)
     parser.add_argument("--tensor-parallel-size", type=int, required=True)
     parser.add_argument("--dtype", default="bfloat16")
+    parser.add_argument("--model-path", type=Path,
+                        help="Optional local merged checkpoint; preserves model metadata from input jobs.")
+    parser.add_argument("--tokenizer-path", type=Path,
+                        help="Optional local tokenizer path (defaults to --model-path).")
     args = parser.parse_args()
 
     if args.all_shards:
@@ -105,10 +109,14 @@ def main() -> None:
     job_hash = sha256(args.jobs)
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
-    tokenizer = AutoTokenizer.from_pretrained(model["repository"], revision=model["tokenizer_revision"])
+    model_source = str(args.model_path) if args.model_path else model["repository"]
+    tokenizer_source = str(args.tokenizer_path or args.model_path) if args.model_path else model["repository"]
+    tokenizer_revision = None if args.model_path else model["tokenizer_revision"]
+    model_revision = None if args.model_path else model["revision"]
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, revision=tokenizer_revision)
     llm = LLM(
-        model=model["repository"], revision=model["revision"], tokenizer=model["repository"],
-        tokenizer_revision=model["tokenizer_revision"], tensor_parallel_size=args.tensor_parallel_size,
+        model=model_source, revision=model_revision, tokenizer=tokenizer_source,
+        tokenizer_revision=tokenizer_revision, tensor_parallel_size=args.tensor_parallel_size,
         dtype=args.dtype,
     )
     for shard_index in indices:
