@@ -1,14 +1,14 @@
 {
   "schema_version": 2,
-  "selection_status": "contamination_audited_smoke_only",
-  "selection_rationale": "BongLLaMA is a Bengali-specialized instruction model evaluated only as a secondary language-specialization extension. The public 172,026-row Bangla Alpaca Orca SFT corpus showed zero direct exact or normalized matches against the 19,543 frozen items; this does not rule out undocumented web-pretraining overlap.",
+  "selection_status": "contamination_audited_secondary_full_run",
+  "selection_rationale": "BongLLaMA is a Bengali-specialized instruction model evaluated as a secondary language-specialization extension, separate from the primary cross-family set. The public 172,026-row Bangla Alpaca Orca SFT corpus showed zero direct exact or normalized matches against the 19,543 frozen items; this does not rule out undocumented web-pretraining overlap.",
   "models": [
     {
       "name": "BongLLaMA-7B-Instruct-v0.1",
       "repository": "BanglaLLM/bangla-llama-7b-instruct-v0.1",
       "enabled": false,
       "selected": true,
-      "evaluation_stage": "secondary_bengali_specialization_smoke",
+      "evaluation_stage": "secondary_bengali_specialization_full_run",
       "analysis_role": "bengali_specialized_model",
       "revision": "762f05b48bd325319c87d78a2e54d2814bca89a3",
       "tokenizer_revision": "762f05b48bd325319c87d78a2e54d2814bca89a3",
