@@ -1,0 +1,9 @@
+{
+  "schema_version": 2,
+  "selection_status": "protocol_correction_rerun",
+  "selection_rationale": "Only Qwen conditions that failed the frozen exact-envelope quality check are rerun with Qwen automatic-thinking mode explicitly disabled.",
+  "models": [
+    {"name": "Qwen3-32B", "repository": "Qwen/Qwen3-32B", "enabled": false, "selected": true, "evaluation_stage": "protocol_correction", "revision": "9216db5781bf21249d130ec9da846c4624c16137", "tokenizer_revision": "9216db5781bf21249d130ec9da846c4624c16137", "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4", "license": "apache-2.0", "access_status": "verified_public"},
+    {"name": "Qwen3-8B", "repository": "Qwen/Qwen3-8B", "enabled": false, "selected": true, "evaluation_stage": "protocol_correction", "revision": "b968826d9c46dd6066d109eabc6255188de91218", "tokenizer_revision": "b968826d9c46dd6066d109eabc6255188de91218", "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4", "license": "apache-2.0", "access_status": "verified_public"}
+  ]
+}
