@@ -83,6 +83,10 @@ def main() -> None:
                         help="Run every incomplete shard in one persistent GPU allocation.")
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--event-dir", type=Path)
+    parser.add_argument("--shard-start", type=int, default=0,
+                        help="First shard in a disjoint all-shards worker stride (default: 0).")
+    parser.add_argument("--shard-stride", type=int, default=1,
+                        help="Shard stride in a disjoint all-shards worker set (default: 1).")
     parser.add_argument("--tensor-parallel-size", type=int, required=True)
     parser.add_argument("--dtype", default="bfloat16")
     parser.add_argument("--model-path", type=Path,
@@ -91,10 +95,13 @@ def main() -> None:
                         help="Optional local tokenizer path (defaults to --model-path).")
     args = parser.parse_args()
 
+    if args.shard_start < 0 or args.shard_stride < 1:
+        parser.error("--shard-start must be non-negative and --shard-stride must be positive")
+
     if args.all_shards:
         if args.shard_index is not None or args.output or args.event_log or not args.output_dir or not args.event_dir:
             parser.error("--all-shards requires --output-dir and --event-dir, without single-shard arguments")
-        indices = range(shard_count(args.jobs, args.shard_size))
+        indices = range(args.shard_start, shard_count(args.jobs, args.shard_size), args.shard_stride)
     else:
         if args.shard_index is None or not args.output or not args.event_log:
             parser.error("a single shard requires --shard-index, --output, and --event-log")

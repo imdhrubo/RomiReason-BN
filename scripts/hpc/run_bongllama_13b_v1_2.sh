@@ -26,6 +26,8 @@ if [[ ! -f "$VENV_PATH/bin/activate" ]]; then
   exit 1
 fi
 source "$VENV_PATH/bin/activate"
+SHARD_START="${SHARD_START:-${SLURM_ARRAY_TASK_ID:-0}}"
+SHARD_STRIDE="${SHARD_STRIDE:-1}"
 if [[ ! -f "$BONG13_MERGED_MODEL_DIR/model.safetensors.index.json" ]]; then
   echo "Missing merged BongLLaMA-13B checkpoint: $BONG13_MERGED_MODEL_DIR. Submit scripts/hpc/prepare_bongllama_13b_merged.sh first." >&2
   exit 1
@@ -36,4 +38,4 @@ python scripts/hpc/run_vllm_jsonl.py \
   --shard-size 500 --all-shards \
   --output-dir "$RESULTS_ROOT/bengali_specialization_size_extension_v1_2/bongllama-13b-instruct-v0-1/responses" \
   --event-dir "$RESULTS_ROOT/bengali_specialization_size_extension_v1_2/bongllama-13b-instruct-v0-1/events" \
-  --tensor-parallel-size 1 --dtype bfloat16 --model-path "$BONG13_MERGED_MODEL_DIR"
+  --tensor-parallel-size 1 --dtype bfloat16 --model-path "$BONG13_MERGED_MODEL_DIR" --shard-start "$SHARD_START" --shard-stride "$SHARD_STRIDE"

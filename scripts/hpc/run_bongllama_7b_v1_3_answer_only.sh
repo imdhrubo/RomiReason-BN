@@ -25,10 +25,12 @@ if [[ ! -f "$VENV_PATH/bin/activate" ]]; then
   exit 1
 fi
 source "$VENV_PATH/bin/activate"
+SHARD_START="${SHARD_START:-${SLURM_ARRAY_TASK_ID:-0}}"
+SHARD_STRIDE="${SHARD_STRIDE:-1}"
 
 python scripts/hpc/run_vllm_jsonl.py \
   --jobs "$EVALUATION_ROOT/bengali_specialization_v1_3_answer_only_inference_inputs/bongllama-7b-instruct-v0-1.jsonl" \
   --shard-size 500 --all-shards \
   --output-dir "$RESULTS_ROOT/bengali_specialization_v1_3_answer_only/bongllama-7b-instruct-v0-1/responses" \
   --event-dir "$RESULTS_ROOT/bengali_specialization_v1_3_answer_only/bongllama-7b-instruct-v0-1/events" \
-  --tensor-parallel-size 1 --dtype bfloat16
+  --tensor-parallel-size 1 --dtype bfloat16 --shard-start "$SHARD_START" --shard-stride "$SHARD_STRIDE"
