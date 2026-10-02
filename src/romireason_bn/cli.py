@@ -15,7 +15,7 @@ from .llm_validation import validate_batch_rows
 from .rule_synthetic import build_rule_synthetic_records, load_rule_catalog
 from .review_export import assemble_paired_candidate, export_hf_task_release, export_review_candidate, freeze_reviewed_release
 from .evaluation import build_evaluation_jobs, load_parquet_rows, load_protocol, load_response_rows, score_responses, split_inference_and_scoring_jobs, stratified_smoke_rows, write_parquet_rows
-from .analysis import analysis_summary
+from .analysis import analysis_summary, export_cross_run_summary
 from .model_planning import build_model_run_plan
 from .curation import (
     build_dedup_input_manifest,
@@ -293,6 +293,10 @@ def build_parser() -> argparse.ArgumentParser:
     analyze_eval.add_argument("--replicates", type=int, default=10000)
     analyze_eval.add_argument("--seed", type=int, default=2027)
     analyze_eval.add_argument("--output", type=Path, required=True)
+
+    export_summary = subparsers.add_parser("export-cross-run-summary")
+    export_summary.add_argument("--summary-root", type=Path, required=True)
+    export_summary.add_argument("--output", type=Path, required=True)
 
     model_plan = subparsers.add_parser("plan-evaluator-runs")
     model_plan.add_argument("--models", type=Path, required=True)
@@ -1093,6 +1097,10 @@ def main(argv: list[str] | None = None) -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(f"EVALUATION_ANALYSIS_OK items={summary['items']}")
+        return 0
+    if args.command == "export-cross-run-summary":
+        rows = export_cross_run_summary(args.summary_root, args.output)
+        print(f"CROSS_RUN_SUMMARY_OK runs={rows}")
         return 0
     if args.command == "plan-evaluator-runs":
         plan = build_model_run_plan(args.models, args.protocol, args.cohort_items)

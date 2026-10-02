@@ -106,9 +106,12 @@ class EvaluationTests(unittest.TestCase):
                          "variant_id": variant_id, "correct": correct})
         outcomes = item_level_outcomes(rows)
         self.assertFalse(outcomes[0]["llm_all"])
+        self.assertEqual(outcomes[0]["llm_mean"], 2 / 3)
         self.assertFalse(outcomes[0]["all_forms_same_and_correct"])
         summary = analysis_summary(rows, replicates=20, seed=2027)
         self.assertEqual(summary["items"], 1)
+        self.assertEqual(summary["primary_outcome"], "mean_accuracy_across_three_llm_generated_forms")
+        self.assertEqual(summary["condition_accuracy"]["llm_mean"], 2 / 3)
 
     def test_model_plan_contains_primary_large_models_only(self):
         plan = build_model_run_plan(ROOT / "configs/models.json", ROOT / "configs/evaluation_protocol_v1.json", 2)
