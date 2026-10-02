@@ -1,6 +1,7 @@
 {
   "protocol_version": "evaluation-v1.4-qwen-template-corrected-answer-only",
-  "status": "frozen_correction",
+  "status": "frozen",
+  "correction_status": "template_correction_rerun",
   "supersedes_for_qwen": "evaluation-v1.3-answer-only",
   "change_rationale": "The v1.3 Qwen-8B run omitted its repository-specific automatic-thinking override. This corrective version preserves every task instruction, decoding value, parser, cohort, and paired condition; it adds the same Qwen template override already used successfully for Qwen-32B.",
   "chat_template_kwargs_by_repository": {"Qwen/Qwen3-32B": {"enable_thinking": false}, "Qwen/Qwen3-8B": {"enable_thinking": false}},

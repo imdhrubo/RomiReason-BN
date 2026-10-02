@@ -1,6 +1,7 @@
 {
   "protocol_version": "evaluation-v1.4-qwen-template-corrected-reasoning",
-  "status": "frozen_correction",
+  "status": "frozen",
+  "correction_status": "template_correction_rerun",
   "supersedes_for_qwen": "evaluation-v1.2",
   "change_rationale": "The v1.2 Qwen runs left Qwen's automatic-thinking chat-template mode enabled while also requesting the explicit shared <think></think><answer></answer> envelope. This corrective version preserves every task instruction, decoding value, parser, cohort, and paired condition; it only disables Qwen's competing automatic-thinking template mode.",
   "chat_template_kwargs_by_repository": {"Qwen/Qwen3-32B": {"enable_thinking": false}, "Qwen/Qwen3-8B": {"enable_thinking": false}},
