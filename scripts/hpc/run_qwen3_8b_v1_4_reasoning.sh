@@ -1,10 +1,10 @@
 #!/bin/bash
 # Qwen template-correction rerun: reasoning protocol only.
-#SBATCH --partition=Nebula_GPU
+#SBATCH --partition=GPU
 #SBATCH --time=2-00:00:00
 #SBATCH --mem=80G
-#SBATCH --cpus-per-task=16
-#SBATCH --gres=gpu:L40S:1
+#SBATCH --cpus-per-task=8
+#SBATCH --gres=gpu:A100:1
 #SBATCH --job-name=rrbn-qwen8-v14r
 #SBATCH --output=slurm-rrbn-qwen8-v14r-%j.out
 #SBATCH --error=slurm-rrbn-qwen8-v14r-%j.err
