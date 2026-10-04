@@ -91,7 +91,9 @@ def build_in_domain_sft(
         rows, config["split_seed"], config["development_fraction"], config["test_fraction"]
     )
     records: dict[str, list[dict[str, Any]]] = {
-        "native_only_train": [], "romanized_only_train": [], "mixed_train": [], "split_manifest": []
+        "native_only_train": [], "romanized_only_train": [], "mixed_train": [],
+        "native_only_development": [], "romanized_only_development": [], "mixed_development": [],
+        "split_manifest": [],
     }
     for row in sorted(rows, key=lambda entry: entry["item_id"]):
         split = split_by_item[row["item_id"]]
@@ -100,13 +102,14 @@ def build_in_domain_sft(
             "item_id": row["item_id"], "split": split, "task_type": row["task_type"],
             "source_dataset": row["source_dataset"], "romanization_variant_id": variant_id,
         })
-        if split != "train":
+        if split == "test":
             continue
         native = sft_record(row, split, "native", row["native_text"], None)
         romanized_record = sft_record(row, split, "llm_romanized", romanized, variant_id)
-        records["native_only_train"].append(native)
-        records["romanized_only_train"].append(romanized_record)
-        records["mixed_train"].extend((native, romanized_record))
+        prefix = "train" if split == "train" else "development"
+        records[f"native_only_{prefix}"].append(native)
+        records[f"romanized_only_{prefix}"].append(romanized_record)
+        records[f"mixed_{prefix}"].extend((native, romanized_record))
     output_dir.mkdir(parents=True, exist_ok=True)
     output_paths: dict[str, str] = {}
     output_hashes: dict[str, str] = {}

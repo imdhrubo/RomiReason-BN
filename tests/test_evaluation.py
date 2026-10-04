@@ -118,6 +118,7 @@ class EvaluationTests(unittest.TestCase):
             mixed = [json.loads(line) for line in (root / "inputs" / "mixed_train.jsonl").read_text().splitlines()]
             self.assertEqual(len(mixed), 48)
             self.assertEqual({row["input_condition"] for row in mixed}, {"native", "llm_romanized"})
+            self.assertEqual(len((root / "inputs" / "mixed_development.jsonl").read_text().splitlines()), 6)
 
     def test_item_analysis_requires_complete_llm_triplet(self):
         rows = []
