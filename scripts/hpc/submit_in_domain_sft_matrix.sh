@@ -6,6 +6,9 @@ set -euo pipefail
 project_root="${SLURM_SUBMIT_DIR:-$PWD}"
 cd "$project_root"
 output_root="${SFT_OUTPUT_ROOT:-/scratch/$USER/romireason-bn-sft}"
+# Optional comma-delimited keys of runs already queued or running, for example:
+# Qwen3-8B:native_only:20271011,Qwen3-8B:romanized_only:20271011
+skip_runs=",${SKIP_RUNS:-},"
 
 models=(
   "Qwen3-8B|Qwen/Qwen3-8B|b968826d9c46dd6066d109eabc6255188de91218"
@@ -20,6 +23,11 @@ for entry in "${models[@]}"; do
   IFS='|' read -r label model revision <<< "$entry"
   for condition in "${conditions[@]}"; do
     for seed in "${seeds[@]}"; do
+      run_key="${label}:${condition}:${seed}"
+      if [[ "$skip_runs" == *",${run_key},"* ]]; then
+        echo "Skipping explicitly excluded run: $run_key"
+        continue
+      fi
       metadata_path="$output_root/${model##*/}/${condition}/seed-${seed}/run_metadata.json"
       if [[ "${SKIP_COMPLETED:-1}" == "1" && -f "$metadata_path" ]]; then
         echo "Skipping completed run: ${label} ${condition} seed=${seed}"
