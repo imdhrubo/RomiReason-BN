@@ -287,6 +287,7 @@ def build_parser() -> argparse.ArgumentParser:
     score_eval.add_argument("--jobs", type=Path, required=True)
     score_eval.add_argument("--responses", type=Path, required=True)
     score_eval.add_argument("--output", type=Path, required=True)
+    score_eval.add_argument("--parser-override", choices=["answer_tag_recovery_v1"])
 
     analyze_eval = subparsers.add_parser("analyze-evaluations")
     analyze_eval.add_argument("--scored", type=Path, required=True)
@@ -1086,7 +1087,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"HF_TASK_RELEASE_OK items={summary['items']} columns={summary['columns']}")
         return 0
     if args.command == "score-evaluation-responses":
-        scored = score_responses(read_jsonl_rows(args.jobs), load_response_rows(args.responses))
+        scored = score_responses(
+            read_jsonl_rows(args.jobs), load_response_rows(args.responses), args.parser_override
+        )
         write_jsonl_rows(args.output, scored)
         print(f"EVALUATION_SCORED_OK forms={len(scored)}")
         return 0

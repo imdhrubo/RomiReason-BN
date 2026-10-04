@@ -22,6 +22,7 @@ _THINK_ANSWER_TAGS = re.compile(
     re.DOTALL | re.IGNORECASE,
 )
 _ANSWER_ONLY_TAG = re.compile(r"^\s*<answer>\s*(.*?)\s*</answer>\s*$", re.DOTALL | re.IGNORECASE)
+_ANSWER_TAG = re.compile(r"<answer>\s*(.*?)\s*</answer>", re.DOTALL | re.IGNORECASE)
 _OPTION = re.compile(r"^(?:option|বিকল্প)?\s*([12])$", re.IGNORECASE)
 
 
@@ -213,6 +214,19 @@ def _parse_schema_aware_answer_only(output_text: str, expected_answer: str) -> t
     return _parse_schema_aware_final(f"<final>{match.group(1)}</final>", expected_answer)
 
 
+def _parse_answer_tag_recovery(output_text: str, expected_answer: str) -> tuple[str, bool]:
+    """Post-hoc recovery of one explicit answer tag, regardless of prior text.
+
+    This deliberately does not validate the reasoning envelope.  It is intended
+    for a separately reported sensitivity analysis, never as a replacement for
+    a protocol's pre-specified strict parser.
+    """
+    matches = _ANSWER_TAG.findall(output_text)
+    if len(matches) != 1:
+        return "unscorable", False
+    return _parse_schema_aware_final(f"<final>{matches[0]}</final>", expected_answer)
+
+
 def parse_and_score(
     output_text: str, expected_answer: str, parser: str = "strict_answer_only_v1"
 ) -> tuple[str, bool]:
@@ -223,6 +237,8 @@ def parse_and_score(
         return _parse_schema_aware_think_answer(output_text, expected_answer)
     if parser == "answer_only_schema_aware_v1":
         return _parse_schema_aware_answer_only(output_text, expected_answer)
+    if parser == "answer_tag_recovery_v1":
+        return _parse_answer_tag_recovery(output_text, expected_answer)
     if parser != "strict_answer_only_v1":
         raise ValueError(f"unknown scoring parser: {parser}")
     expected = _normalized(expected_answer)
@@ -237,19 +253,23 @@ def parse_and_score(
     return "parsed", parsed == expected
 
 
-def score_responses(jobs: Iterable[dict[str, Any]], responses: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+def score_responses(
+    jobs: Iterable[dict[str, Any]], responses: Iterable[dict[str, Any]], parser_override: str | None = None
+) -> list[dict[str, Any]]:
     """Join a response artifact keyed by form_id to immutable job metadata."""
     by_id = {str(row["form_id"]): row for row in responses}
     scored: list[dict[str, Any]] = []
     for job in jobs:
         response = by_id.get(job["form_id"])
+        protocol_parser = job.get("scoring", {}).get("parser", "strict_answer_only_v1")
+        parser = parser_override or protocol_parser
         if response is None:
             status, correct, text = "missing", False, ""
         else:
             text = str(response.get("output_text", ""))
-            parser = job.get("scoring", {}).get("parser", "strict_answer_only_v1")
             status, correct = parse_and_score(text, job["expected_answer"], parser)
         scored.append({**job, "output_text": text, "parse_status": status, "correct": correct,
+                       "protocol_parser": protocol_parser, "scoring_parser": parser,
                        "prompt_tokens": response.get("prompt_tokens") if response else None,
                        "completion_tokens": response.get("completion_tokens") if response else None})
     return scored
