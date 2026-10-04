@@ -18,11 +18,6 @@ seeds=(20271011 20271012 20271013)
 
 for entry in "${models[@]}"; do
   IFS='|' read -r label model revision <<< "$entry"
-  case "$label" in
-    *8B) wall_time="1-00:00:00" ;;
-    *32B) wall_time="3-00:00:00" ;;
-    *) echo "No wall-time policy for $label" >&2; exit 2 ;;
-  esac
   for condition in "${conditions[@]}"; do
     for seed in "${seeds[@]}"; do
       metadata_path="$output_root/${model##*/}/${condition}/seed-${seed}/run_metadata.json"
@@ -31,7 +26,7 @@ for entry in "${models[@]}"; do
         continue
       fi
       sbatch --job-name="rrbn-sft-${label}-${condition}-${seed}" \
-        --time="$wall_time" \
+        --time="2-00:00:00" \
         --export="ALL,MODEL=${model},REVISION=${revision},CONDITION=${condition},SEED=${seed}" \
         scripts/hpc/run_in_domain_sft_qlora.sh
     done
