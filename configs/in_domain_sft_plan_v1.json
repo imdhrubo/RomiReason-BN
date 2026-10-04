@@ -1,0 +1,44 @@
+{
+  "status": "planned",
+  "experiment_version": "in-domain-sft-v1",
+  "scope": "Exploratory in-domain supervised adaptation; report separately from the locked zero-shot evaluation.",
+  "data_config": "configs/in_domain_sft_v1.json",
+  "data_manifest": "artifacts/final/in_domain_sft_v1_manifest.json",
+  "models": [
+    {
+      "name": "Qwen3-8B",
+      "repository": "Qwen/Qwen3-8B",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+      "size_group": "strong_family_small"
+    },
+    {
+      "name": "Qwen3-32B",
+      "repository": "Qwen/Qwen3-32B",
+      "revision": "9216db5781bf21249d130ec9da846c4624c16137",
+      "size_group": "strong_family_large"
+    },
+    {
+      "name": "Aya-8B",
+      "repository": "CohereLabs/aya-expanse-8b",
+      "revision": "5062468bf9bc0c6035fd64e06274333ec127d980",
+      "size_group": "weak_family_small"
+    },
+    {
+      "name": "Aya-32B",
+      "repository": "CohereLabs/aya-expanse-32b",
+      "revision": "b306ea27e360683b50c005d7fcbad6a242317910",
+      "size_group": "weak_family_large"
+    }
+  ],
+  "training_conditions": [
+    {"name": "native_only", "train_file": "native_only_train.jsonl"},
+    {"name": "romanized_only", "train_file": "romanized_only_train.jsonl"},
+    {"name": "mixed", "train_file": "mixed_train.jsonl", "sampling": "equal_native_and_llm_romanized"}
+  ],
+  "training_seeds": [20271011, 20271012, 20271013],
+  "adapter_method": "QLoRA",
+  "target_output": "answer_only_tagged",
+  "primary_outcomes": ["test_llm_mean_accuracy", "test_native_accuracy", "test_llm_mean_minus_native", "test_macro_accuracy"],
+  "selection_rule": "Choose checkpoints and early stopping only with the development split; never use the held-out in-domain test split for training decisions.",
+  "runs": 36
+}
