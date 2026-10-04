@@ -12,7 +12,12 @@ set -euo pipefail
 module load python/3.12.3
 project_root="${SLURM_SUBMIT_DIR:-$PWD}"
 cd "$project_root"
-source .venv-sft/bin/activate
+venv_dir="${SFT_VENV:-/scratch/$USER/romireason-bn-sft-venv}"
+if [[ ! -f "$venv_dir/bin/activate" ]]; then
+  echo "Missing SFT virtual environment: $venv_dir. Run scripts/hpc/setup_sft_venv.sh first." >&2
+  exit 2
+fi
+source "$venv_dir/bin/activate"
 
 : "${MODEL:?Set MODEL, e.g. Qwen/Qwen3-8B}"
 : "${REVISION:?Set REVISION to the pinned model commit}"
