@@ -5,6 +5,7 @@ set -euo pipefail
 
 project_root="${SLURM_SUBMIT_DIR:-$PWD}"
 cd "$project_root"
+output_root="${SFT_OUTPUT_ROOT:-/scratch/$USER/romireason-bn-sft}"
 
 models=(
   "Qwen3-8B|Qwen/Qwen3-8B|b968826d9c46dd6066d109eabc6255188de91218"
@@ -19,6 +20,11 @@ for entry in "${models[@]}"; do
   IFS='|' read -r label model revision <<< "$entry"
   for condition in "${conditions[@]}"; do
     for seed in "${seeds[@]}"; do
+      metadata_path="$output_root/${model##*/}/${condition}/seed-${seed}/run_metadata.json"
+      if [[ "${SKIP_COMPLETED:-1}" == "1" && -f "$metadata_path" ]]; then
+        echo "Skipping completed run: ${label} ${condition} seed=${seed}"
+        continue
+      fi
       sbatch --job-name="rrbn-sft-${label}-${condition}-${seed}" \
         --export="ALL,MODEL=${model},REVISION=${revision},CONDITION=${condition},SEED=${seed}" \
         scripts/hpc/run_in_domain_sft_qlora.sh
