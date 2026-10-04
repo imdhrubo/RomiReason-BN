@@ -214,12 +214,12 @@ def _parse_schema_aware_answer_only(output_text: str, expected_answer: str) -> t
     return _parse_schema_aware_final(f"<final>{match.group(1)}</final>", expected_answer)
 
 
-def _parse_answer_tag_recovery(output_text: str, expected_answer: str) -> tuple[str, bool]:
-    """Post-hoc recovery of one explicit answer tag, regardless of prior text.
+def _parse_answer_tag_extraction(output_text: str, expected_answer: str) -> tuple[str, bool]:
+    """Extract one explicit answer tag, permitting unwanted surrounding text.
 
-    This deliberately does not validate the reasoning envelope.  It is intended
-    for a separately reported sensitivity analysis, never as a replacement for
-    a protocol's pre-specified strict parser.
+    Exactly one closed ``<answer>`` tag is required. This makes the answer
+    extraction rule consistent across visible-reasoning and answer-only runs,
+    while still failing closed on absent, unclosed, or repeated answer tags.
     """
     matches = _ANSWER_TAG.findall(output_text)
     if len(matches) != 1:
@@ -237,8 +237,8 @@ def parse_and_score(
         return _parse_schema_aware_think_answer(output_text, expected_answer)
     if parser == "answer_only_schema_aware_v1":
         return _parse_schema_aware_answer_only(output_text, expected_answer)
-    if parser == "answer_tag_recovery_v1":
-        return _parse_answer_tag_recovery(output_text, expected_answer)
+    if parser in {"answer_tag_extraction_v1", "answer_tag_recovery_v1"}:
+        return _parse_answer_tag_extraction(output_text, expected_answer)
     if parser != "strict_answer_only_v1":
         raise ValueError(f"unknown scoring parser: {parser}")
     expected = _normalized(expected_answer)

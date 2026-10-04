@@ -43,8 +43,8 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(parse_and_score("<answer>Neutral</answer>", "neutral", parser), ("parsed", True))
         self.assertEqual(parse_and_score("reasoning <answer>A</answer>", "A", parser), ("unscorable", False))
 
-    def test_answer_tag_recovery_is_explicitly_relaxed(self):
-        parser = "answer_tag_recovery_v1"
+    def test_answer_tag_extraction_permits_surrounding_text(self):
+        parser = "answer_tag_extraction_v1"
         self.assertEqual(parse_and_score("work\n<answer>৩</answer>", "3", parser), ("parsed", True))
         self.assertEqual(parse_and_score("<answer>A</answer> extra", "A", parser), ("parsed", True))
         self.assertEqual(parse_and_score("<answer>A</answer><answer>B</answer>", "A", parser), ("unscorable", False))
