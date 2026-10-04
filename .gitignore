@@ -41,6 +41,8 @@ data/examples/*
 !data/examples/pilot_example.jsonl
 data/release/**
 !data/release/romireason_bn_v1_19543.parquet
+data/finetuning/**
+!data/finetuning/.gitkeep
 
 # Keep only runtime model/evaluation configuration; generation configuration
 # stays local with the archival project materials.

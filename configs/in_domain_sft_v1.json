@@ -1,0 +1,16 @@
+{
+  "status": "frozen",
+  "protocol_version": "in-domain-sft-v1",
+  "split_seed": 20271003,
+  "development_fraction": 0.1,
+  "test_fraction": 0.1,
+  "split_allocation": "task-stratified 80% train, 10% development, 10% test; preserve the natural 33.7% math_reasoning, 47.6% factual_qa, and 18.7% basic_understanding composition in every split.",
+  "primary_test_aggregation": "micro_average_over_the_naturally_composed_test_split",
+  "secondary_test_aggregation": "macro_average_over_three_task_types",
+  "romanization_selection": "one_existing_llm_variant_per_item_deterministic_hash",
+  "romanization_selection_seed": 20271004,
+  "training_conditions": ["native_only", "romanized_only", "mixed_separate_records"],
+  "excluded_training_conditions": ["canonical", "rule_synthetic"],
+  "target_format": "<answer>{gold_answer}</answer>",
+  "compute_control": "Hold optimizer steps and token budget equal across conditions; sample native and Romanized records equally in the mixed condition."
+}

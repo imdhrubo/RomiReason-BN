@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from romireason_bn.analysis import analysis_summary, item_level_outcomes  # noqa: E402
 from romireason_bn.evaluation import build_evaluation_jobs, load_response_rows, parse_and_score, split_inference_and_scoring_jobs, stratified_smoke_rows  # noqa: E402
 from romireason_bn.model_planning import build_model_run_plan  # noqa: E402
+from romireason_bn.finetuning import build_in_domain_sft  # noqa: E402
 
 
 class EvaluationTests(unittest.TestCase):
@@ -100,6 +101,23 @@ class EvaluationTests(unittest.TestCase):
         second = stratified_smoke_rows(rows, per_task=2, seed=2027)
         self.assertEqual(first, second)
         self.assertEqual(len(first), 6)
+
+    def test_in_domain_sft_keeps_item_variants_in_one_split(self):
+        rows = [
+            {"item_id": f"item-{index}", "review_status": "frozen", "task_type": task,
+             "source_dataset": "source", "answer": "A", "native_text": "native",
+             "llm_generated_variants": [{"variant_id": 1, "text": "r1"}, {"variant_id": 2, "text": "r2"}, {"variant_id": 3, "text": "r3"}]}
+            for task in ("math_reasoning", "factual_qa", "basic_understanding") for index in range(10)
+        ]
+        config = {"status": "frozen", "split_seed": 1, "development_fraction": .1, "test_fraction": .1,
+                  "romanization_selection_seed": 2}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = build_in_domain_sft(rows, config, root / "inputs", root / "manifest.json")
+            self.assertEqual(manifest["train_items"], 24)
+            mixed = [json.loads(line) for line in (root / "inputs" / "mixed_train.jsonl").read_text().splitlines()]
+            self.assertEqual(len(mixed), 48)
+            self.assertEqual({row["input_condition"] for row in mixed}, {"native", "llm_romanized"})
 
     def test_item_analysis_requires_complete_llm_triplet(self):
         rows = []
