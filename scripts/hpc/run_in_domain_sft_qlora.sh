@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=rrbn-sft
-#SBATCH --partition=GPU
-#SBATCH --gres=gpu:A100:1
+#SBATCH --partition=Nebula_GPU
+#SBATCH --gres=gpu:L40S:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=80G
 #SBATCH --time=3-00:00:00
