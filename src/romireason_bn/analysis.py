@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 from collections import defaultdict
 from collections.abc import Iterable
@@ -10,6 +11,61 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def freeze_results_lock(
+    selection_path: Path, summary_csv: Path, dataset_path: Path, output_manifest: Path, output_table: Path
+) -> dict[str, Any]:
+    """Freeze a declared paper-result selection from a complete summary table."""
+    selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    if selection.get("status") != "frozen":
+        raise ValueError("result selection is not frozen")
+    with summary_csv.open(encoding="utf-8", newline="") as handle:
+        all_rows = list(csv.DictReader(handle))
+        fields = handle.seek(0) or next(csv.reader(handle))
+    by_key = {(row["run_group"], row["model"]): row for row in all_rows}
+    chosen: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for entry in selection["included_main_results"]:
+        key = (entry["run_group"], entry["model"])
+        if key in seen:
+            raise ValueError(f"duplicate locked result: {key}")
+        if key not in by_key:
+            raise ValueError(f"locked result absent from summary: {key}")
+        seen.add(key)
+        chosen.append({**by_key[key], "strategy": entry["strategy"]})
+    output_table.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [*fields, "strategy"]
+    with output_table.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(chosen)
+    manifest = {
+        "lock_version": selection["lock_version"],
+        "status": "frozen",
+        "dataset": str(dataset_path),
+        "dataset_sha256": _sha256_file(dataset_path),
+        "answer_extraction": selection["answer_extraction"],
+        "included_main_results": selection["included_main_results"],
+        "retained_nonprimary_results": selection.get("retained_nonprimary_results", []),
+        "excluded_results": selection.get("excluded_results", []),
+        "source_summary": str(summary_csv),
+        "source_summary_sha256": _sha256_file(summary_csv),
+        "locked_table": str(output_table),
+        "locked_table_sha256": _sha256_file(output_table),
+        "rows": len(chosen),
+    }
+    output_manifest.parent.mkdir(parents=True, exist_ok=True)
+    output_manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return manifest
 
 
 def item_level_outcomes(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:

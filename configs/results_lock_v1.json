@@ -1,0 +1,34 @@
+{
+  "lock_version": "romireason-bn-results-v1",
+  "status": "frozen",
+  "answer_extraction": {
+    "parser": "answer_tag_extraction_v1",
+    "rule": "Score exactly one closed <answer>...</answer> tag; ignore surrounding text; mark missing, unclosed, or repeated tags unscorable."
+  },
+  "included_main_results": [
+    {"run_group": "primary_v1_2", "model": "aya-expanse-32b", "strategy": "reasoning"},
+    {"run_group": "primary_v1_2", "model": "gemma-3-27b-it", "strategy": "reasoning"},
+    {"run_group": "primary_v1_2", "model": "llama-3-1-8b-instruct", "strategy": "reasoning"},
+    {"run_group": "primary_v1_2", "model": "qwen3-32b", "strategy": "reasoning"},
+    {"run_group": "primary_v1_3_answer_only", "model": "aya-expanse-32b", "strategy": "answer_only"},
+    {"run_group": "primary_v1_3_answer_only", "model": "gemma-3-27b-it", "strategy": "answer_only"},
+    {"run_group": "primary_v1_3_answer_only", "model": "llama-3-1-8b-instruct", "strategy": "answer_only"},
+    {"run_group": "primary_v1_3_answer_only", "model": "qwen3-32b", "strategy": "answer_only_enable_thinking_false"},
+    {"run_group": "size_extension_v1_2", "model": "aya-expanse-8b", "strategy": "reasoning"},
+    {"run_group": "size_extension_v1_2", "model": "gemma-3-4b-it", "strategy": "reasoning"},
+    {"run_group": "size_extension_v1_2", "model": "qwen3-8b", "strategy": "reasoning"},
+    {"run_group": "size_extension_v1_3_answer_only", "model": "aya-expanse-8b", "strategy": "answer_only"},
+    {"run_group": "size_extension_v1_3_answer_only", "model": "gemma-3-4b-it", "strategy": "answer_only"},
+    {"run_group": "qwen_template_correction_v1_4_answer_only", "model": "qwen3-8b", "strategy": "answer_only_enable_thinking_false"},
+    {"run_group": "tigerllm_v1_2", "model": "tigerllm-9b-it", "strategy": "reasoning"},
+    {"run_group": "tigerllm_v1_3_answer_only", "model": "tigerllm-9b-it", "strategy": "answer_only"}
+  ],
+  "retained_nonprimary_results": [
+    {"run_group": "primary_v1_1", "reason": "exploratory prompt and output schema differ from the locked main protocols"}
+  ],
+  "excluded_results": [
+    {"run_group": "bengali_specialization_*", "reason": "BongLLaMA excluded from this paper because of generation-format incompatibility"},
+    {"run_group": "qwen_template_correction_v1_4_reasoning", "reason": "thinking was disabled despite a reasoning prompt"},
+    {"run_group": "size_extension_v1_3_answer_only", "model": "qwen3-8b", "reason": "superseded by v1.4 answer-only with enable_thinking=false"}
+  ]
+}
