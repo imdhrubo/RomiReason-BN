@@ -15,8 +15,8 @@
       "repositories": ["CohereLabs/aya-expanse-8b", "CohereLabs/aya-expanse-32b"]
     },
     {
-      "id": "v1_4_corrected_reasoning_qwen",
-      "protocol": "configs/evaluation_protocol_v1_4_qwen_reasoning.json",
+      "id": "v1_2_reasoning_qwen_thinking_enabled",
+      "protocol": "configs/evaluation_protocol_v1_2.json",
       "repositories": ["Qwen/Qwen3-8B", "Qwen/Qwen3-32B"]
     },
     {

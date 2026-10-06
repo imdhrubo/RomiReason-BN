@@ -15,7 +15,7 @@ skip_runs=",${SKIP_RUNS:-},"
 evaluations=(
   "v1_2_reasoning_aya:aya-expanse-8b,aya-expanse-32b"
   "v1_3_answer_only_aya:aya-expanse-8b,aya-expanse-32b"
-  "v1_4_corrected_reasoning_qwen:Qwen3-8B,Qwen3-32B"
+  "v1_2_reasoning_qwen_thinking_enabled:Qwen3-8B,Qwen3-32B"
   "v1_4_corrected_answer_only_qwen:Qwen3-8B,Qwen3-32B"
 )
 conditions=(native_only romanized_only mixed)
