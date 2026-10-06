@@ -11,6 +11,7 @@ adapters_root="${SFT_OUTPUT_ROOT:-/scratch/$USER/romireason-bn-sft}"
 partition="${SFT_EVAL_PARTITION:-GPU}"
 gpu_type="${SFT_EVAL_GPU_TYPE:-A100}"
 skip_runs=",${SKIP_RUNS:-},"
+selected_evaluations=",${SFT_EVAL_EVALUATIONS:-},"
 
 evaluations=(
   "v1_2_reasoning_aya:aya-expanse-8b,aya-expanse-32b"
@@ -23,6 +24,10 @@ seeds=(20271011 20271012 20271013)
 
 for evaluation_spec in "${evaluations[@]}"; do
   IFS=':' read -r evaluation models_csv <<< "$evaluation_spec"
+  if [[ "$selected_evaluations" != ",," && "$selected_evaluations" != *",${evaluation},"* ]]; then
+    echo "Skipping evaluation not selected by SFT_EVAL_EVALUATIONS: $evaluation"
+    continue
+  fi
   IFS=',' read -r -a models <<< "$models_csv"
   for model in "${models[@]}"; do
   if [[ "$model" == Qwen3-32B || "$model" == aya-expanse-32b ]]; then
