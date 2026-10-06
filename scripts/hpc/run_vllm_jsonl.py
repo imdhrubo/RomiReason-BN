@@ -93,10 +93,18 @@ def main() -> None:
                         help="Optional local merged checkpoint; preserves model metadata from input jobs.")
     parser.add_argument("--tokenizer-path", type=Path,
                         help="Optional local tokenizer path (defaults to --model-path).")
+    parser.add_argument("--lora-path", type=Path,
+                        help="Optional PEFT LoRA adapter to apply to the pinned base model.")
+    parser.add_argument("--lora-name",
+                        help="Stable label recorded for --lora-path (required when using an adapter).")
     args = parser.parse_args()
 
     if args.shard_start < 0 or args.shard_stride < 1:
         parser.error("--shard-start must be non-negative and --shard-stride must be positive")
+    if (args.lora_path is None) != (args.lora_name is None):
+        parser.error("--lora-path and --lora-name must be provided together")
+    if args.lora_path is not None and args.model_path is not None:
+        parser.error("--lora-path cannot be combined with --model-path; use the pinned base model")
 
     if args.all_shards:
         if args.shard_index is not None or args.output or args.event_log or not args.output_dir or not args.event_dir:
@@ -116,6 +124,7 @@ def main() -> None:
     job_hash = sha256(args.jobs)
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
+    from vllm.lora.request import LoRARequest
     model_source = str(args.model_path) if args.model_path else model["repository"]
     tokenizer_source = str(args.tokenizer_path or args.model_path) if args.model_path else model["repository"]
     tokenizer_revision = None if args.model_path else model["tokenizer_revision"]
@@ -124,7 +133,11 @@ def main() -> None:
     llm = LLM(
         model=model_source, revision=model_revision, tokenizer=tokenizer_source,
         tokenizer_revision=tokenizer_revision, tensor_parallel_size=args.tensor_parallel_size,
-        dtype=args.dtype,
+        dtype=args.dtype, enable_lora=args.lora_path is not None,
+    )
+    lora_request = (
+        LoRARequest(args.lora_name, 1, str(args.lora_path))
+        if args.lora_path is not None else None
     )
     for shard_index in indices:
         output = args.output if not args.all_shards else args.output_dir / f"shard-{shard_index:05d}.jsonl"
@@ -144,6 +157,10 @@ def main() -> None:
             "tokenizer_revision": model["tokenizer_revision"], "job_file_sha256": job_hash,
             "shard_id": shard_index,
         }
+        if args.lora_path is not None:
+            common["lora_name"] = args.lora_name
+            common["lora_path"] = str(args.lora_path)
+            common["lora_adapter_config_sha256"] = sha256(args.lora_path / "adapter_config.json")
         append_event(event_log, {"timestamp_utc": timestamp(), "event": "run_started", **common,
                                 "runtime_versions": "recorded_by_hpc_runner", "device": "cuda",
                                 "dtype_or_quantization": args.dtype, "total_forms": len(rows)})
@@ -159,7 +176,7 @@ def main() -> None:
                 temperature=decoding["temperature"], top_p=decoding["top_p"],
                 max_tokens=decoding["max_output_tokens"],
             )
-            outputs = llm.generate(prompts, sampling, use_tqdm=False)
+            outputs = llm.generate(prompts, sampling, use_tqdm=False, lora_request=lora_request)
             response_rows = [
                 {
                     "form_id": job["form_id"], "output_text": output.outputs[0].text,
