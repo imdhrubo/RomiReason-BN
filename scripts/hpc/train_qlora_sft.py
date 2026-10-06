@@ -19,6 +19,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
+from transformers.trainer_utils import get_last_checkpoint
 
 
 def parse_args() -> argparse.Namespace:
@@ -108,14 +109,23 @@ def main() -> None:
         model=model, args=training_args, train_dataset=train, eval_dataset=development,
         data_collator=DataCollatorForSeq2Seq(tokenizer=tokenizer, padding=True, label_pad_token_id=-100),
     )
-    trainer.train()
+    resume_checkpoint = get_last_checkpoint(str(args.output)) if args.output.exists() else None
+    if resume_checkpoint is not None:
+        print(f"RESUMING_FROM_CHECKPOINT={resume_checkpoint}", flush=True)
+    trainer.train(resume_from_checkpoint=resume_checkpoint)
     trainer.save_model(str(args.output / "best_adapter"))
     tokenizer.save_pretrained(args.output / "best_adapter")
     metadata = {
-        **vars(args),
+        # argparse returns Paths for the filesystem arguments.  Persist their
+        # string forms so this completion marker is valid JSON.
+        **{
+            key: str(value) if isinstance(value, Path) else value
+            for key, value in vars(args).items()
+        },
         "train_records": len(train),
         "development_records": len(development),
         "trainable_parameters": sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad),
+        "resumed_from_checkpoint": resume_checkpoint,
     }
     (args.output / "run_metadata.json").write_text(
         json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
