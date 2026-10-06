@@ -289,7 +289,9 @@ def build_parser() -> argparse.ArgumentParser:
     score_eval.add_argument("--responses", type=Path, required=True)
     score_eval.add_argument("--output", type=Path, required=True)
     score_eval.add_argument(
-        "--parser-override", choices=["answer_tag_extraction_v1", "answer_tag_recovery_v1"]
+        "--parser-override", choices=[
+            "answer_tag_extraction_v1", "answer_tag_recovery_v1", "gold_answer_relaxed_v1",
+        ]
     )
 
     analyze_eval = subparsers.add_parser("analyze-evaluations")

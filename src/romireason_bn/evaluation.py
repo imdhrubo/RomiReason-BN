@@ -227,6 +227,20 @@ def _parse_answer_tag_extraction(output_text: str, expected_answer: str) -> tupl
     return _parse_schema_aware_final(f"<final>{matches[0]}</final>", expected_answer)
 
 
+def _parse_gold_answer_relaxed(output_text: str, expected_answer: str) -> tuple[str, bool]:
+    """Score an explicit answer tag or a standalone answer without schema requirements.
+
+    This is intended for answer-accuracy diagnostics when output-format
+    compliance is deliberately out of scope.  It never infers an answer from
+    a rationale: if no unique answer tag is present, the complete output must
+    itself be a normalized standalone answer.
+    """
+    status, correct = _parse_answer_tag_extraction(output_text, expected_answer)
+    if status == "parsed":
+        return status, correct
+    return parse_and_score(output_text, expected_answer, "strict_answer_only_v1")
+
+
 def parse_and_score(
     output_text: str, expected_answer: str, parser: str = "strict_answer_only_v1"
 ) -> tuple[str, bool]:
@@ -239,6 +253,8 @@ def parse_and_score(
         return _parse_schema_aware_answer_only(output_text, expected_answer)
     if parser in {"answer_tag_extraction_v1", "answer_tag_recovery_v1"}:
         return _parse_answer_tag_extraction(output_text, expected_answer)
+    if parser == "gold_answer_relaxed_v1":
+        return _parse_gold_answer_relaxed(output_text, expected_answer)
     if parser != "strict_answer_only_v1":
         raise ValueError(f"unknown scoring parser: {parser}")
     expected = _normalized(expected_answer)
