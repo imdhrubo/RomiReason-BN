@@ -30,28 +30,29 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_split_ids(path: Path) -> set[str]:
-    test_ids: set[str] = set()
+def read_split_ids(path: Path, split: str) -> set[str]:
+    selected_ids: set[str] = set()
     with path.open(encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, start=1):
             if not line.strip():
                 continue
             row = json.loads(line)
-            if row.get("split") != "test":
+            if row.get("split") != split:
                 continue
             item_id = str(row["item_id"])
-            if item_id in test_ids:
-                raise ValueError(f"duplicate test item in {path}:{line_number}: {item_id}")
-            test_ids.add(item_id)
-    if not test_ids:
-        raise ValueError(f"no test items in {path}")
-    return test_ids
+            if item_id in selected_ids:
+                raise ValueError(f"duplicate {split} item in {path}:{line_number}: {item_id}")
+            selected_ids.add(item_id)
+    if not selected_ids:
+        raise ValueError(f"no {split} items in {path}")
+    return selected_ids
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--split-manifest", type=Path, required=True)
+    parser.add_argument("--split", choices=["development", "test"], default="test")
     parser.add_argument("--protocol", type=Path, required=True)
     parser.add_argument("--sft-plan", type=Path, required=True)
     parser.add_argument("--models", type=Path, required=True)
@@ -61,11 +62,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    test_ids = read_split_ids(args.split_manifest)
-    dataset_rows = [row for row in load_parquet_rows(args.dataset) if str(row["item_id"]) in test_ids]
+    selected_ids = read_split_ids(args.split_manifest, args.split)
+    dataset_rows = [row for row in load_parquet_rows(args.dataset) if str(row["item_id"]) in selected_ids]
     found_ids = {str(row["item_id"]) for row in dataset_rows}
-    if found_ids != test_ids:
-        raise ValueError(f"test split and dataset disagree: missing={len(test_ids - found_ids)} extra={len(found_ids - test_ids)}")
+    if found_ids != selected_ids:
+        raise ValueError(f"{args.split} split and dataset disagree: missing={len(selected_ids - found_ids)} extra={len(found_ids - selected_ids)}")
     dataset_rows.sort(key=lambda row: str(row["item_id"]))
     protocol = load_protocol(args.protocol)
     plan = json.loads(args.sft_plan.read_text(encoding="utf-8"))
@@ -110,12 +111,13 @@ def main() -> None:
                     "forms": len(inference_jobs),
                 })
     manifest = {
-        "status": "heldout_sft_evaluation_inputs_ready_no_inference_started",
+        "status": f"{args.split}_sft_evaluation_inputs_ready_no_inference_started",
         "dataset": str(args.dataset),
         "dataset_sha256": sha256(args.dataset),
         "split_manifest": str(args.split_manifest),
         "split_manifest_sha256": sha256(args.split_manifest),
-        "test_items": len(dataset_rows),
+        "split": args.split,
+        "items": len(dataset_rows),
         "protocol": str(args.protocol),
         "protocol_sha256": sha256(args.protocol),
         "runs": runs,
@@ -124,7 +126,7 @@ def main() -> None:
     manifest_path = args.output_dir / "manifest.json"
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"SFT_HELDOUT_JOBS_OK test_items={len(dataset_rows)} runs={len(runs)} forms={manifest['total_forms']}")
+    print(f"SFT_EVALUATION_JOBS_OK split={args.split} items={len(dataset_rows)} runs={len(runs)} forms={manifest['total_forms']}")
 
 
 if __name__ == "__main__":
