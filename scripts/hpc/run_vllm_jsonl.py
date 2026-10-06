@@ -126,7 +126,7 @@ def main() -> None:
     # embedding with a LoRA adapter.  Keep Qwen on V1, but use vLLM's
     # documented legacy-engine fallback for these affected runs.
     if str(model["repository"]).startswith("CohereLabs/aya-expanse-"):
-        os.environ.setdefault("VLLM_USE_V1", "0")
+        os.environ["VLLM_USE_V1"] = "0"
     job_hash = sha256(args.jobs)
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
