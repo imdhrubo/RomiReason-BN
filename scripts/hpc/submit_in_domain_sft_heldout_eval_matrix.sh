@@ -32,6 +32,11 @@ for evaluation_spec in "${evaluations[@]}"; do
     gpu_count=1
     cpus=8
   fi
+  if [[ "$model" == aya-expanse-* ]]; then
+    runner="transformers_peft"
+  else
+    runner="vllm"
+  fi
   for condition in "${conditions[@]}"; do
     for seed in "${seeds[@]}"; do
       run_key="${evaluation}:${model}:${condition}:${seed}"
@@ -60,7 +65,7 @@ for evaluation_spec in "${evaluations[@]}"; do
         --job-name="rrbn-sft-eval-${evaluation}-${model}-${condition}-${seed}" \
         --output="slurm-%x-%j.out" \
         --error="slurm-%x-%j.err" \
-        --export="ALL,JOBS=$jobs,RESULTS_DIR=$results,EVENTS_DIR=$events,LORA_PATH=$adapter,LORA_NAME=${evaluation}-${model}-${condition}-${seed},TENSOR_PARALLEL_SIZE=$gpu_count" \
+        --export="ALL,JOBS=$jobs,RESULTS_DIR=$results,EVENTS_DIR=$events,LORA_PATH=$adapter,LORA_NAME=${evaluation}-${model}-${condition}-${seed},TENSOR_PARALLEL_SIZE=$gpu_count,RUNNER=$runner" \
         scripts/hpc/run_in_domain_sft_heldout_eval.sh
     done
   done
