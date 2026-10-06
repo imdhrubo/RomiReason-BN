@@ -23,7 +23,7 @@ seeds=(20271011 20271012 20271013)
 
 for evaluation_spec in "${evaluations[@]}"; do
   IFS=':' read -r evaluation models_csv <<< "$evaluation_spec"
-  IFS=',' read -rA models <<< "$models_csv"
+  IFS=',' read -r -a models <<< "$models_csv"
   for model in "${models[@]}"; do
   if [[ "$model" == Qwen3-32B || "$model" == aya-expanse-32b ]]; then
     gpu_count=2
