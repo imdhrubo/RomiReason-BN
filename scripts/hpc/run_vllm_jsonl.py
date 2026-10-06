@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -121,6 +122,11 @@ def main() -> None:
     if not first_rows:
         raise ValueError("job file has no rows")
     model = first_rows[0]["model"]
+    # vLLM V1 currently fails while wrapping Aya/Command-R's tied output
+    # embedding with a LoRA adapter.  Keep Qwen on V1, but use vLLM's
+    # documented legacy-engine fallback for these affected runs.
+    if str(model["repository"]).startswith("CohereLabs/aya-expanse-"):
+        os.environ.setdefault("VLLM_USE_V1", "0")
     job_hash = sha256(args.jobs)
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
