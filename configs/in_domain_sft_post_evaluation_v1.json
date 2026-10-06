@@ -1,0 +1,28 @@
+{
+  "status": "frozen",
+  "campaign_version": "in-domain-sft-post-evaluation-v1",
+  "cohort": "frozen_in_domain_sft_test_split",
+  "excluded_protocols": ["evaluation-v1.1"],
+  "evaluations": [
+    {
+      "id": "v1_2_reasoning_aya",
+      "protocol": "configs/evaluation_protocol_v1_2.json",
+      "repositories": ["CohereLabs/aya-expanse-8b", "CohereLabs/aya-expanse-32b"]
+    },
+    {
+      "id": "v1_3_answer_only_aya",
+      "protocol": "configs/evaluation_protocol_v1_3_answer_only.json",
+      "repositories": ["CohereLabs/aya-expanse-8b", "CohereLabs/aya-expanse-32b"]
+    },
+    {
+      "id": "v1_4_corrected_reasoning_qwen",
+      "protocol": "configs/evaluation_protocol_v1_4_qwen_reasoning.json",
+      "repositories": ["Qwen/Qwen3-8B", "Qwen/Qwen3-32B"]
+    },
+    {
+      "id": "v1_4_corrected_answer_only_qwen",
+      "protocol": "configs/evaluation_protocol_v1_4_qwen_answer_only.json",
+      "repositories": ["Qwen/Qwen3-8B", "Qwen/Qwen3-32B"]
+    }
+  ]
+}
